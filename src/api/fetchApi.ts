@@ -20,6 +20,8 @@ export interface Product {
   specs?: string;
   price: number;
   stock?: number;
+  image?: string;
+  image_url?: string | null;
   category?: ProductCategory | null;
   created_at?: string;
   updated_at?: string;
