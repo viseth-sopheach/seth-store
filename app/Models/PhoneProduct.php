@@ -18,6 +18,7 @@ class PhoneProduct extends Model
         'price',
         'specs',
         'stock',
+        'image',
     ];
 
     protected $casts = [

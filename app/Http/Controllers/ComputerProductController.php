@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ComputerProduct;
+use Illuminate\Http\Request;
+
+class ComputerProductController extends Controller
+{
+    public function index()
+    {
+        $products = ComputerProduct::with('category')->get()->map(function ($product) {
+            $product->image_url = $product->image ? (filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : asset('storage/' . $product->image)) : null;
+            return $product;
+        });
+
+        return response()->json($products);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'name'        => 'required|string|max:255',
+            'brand'       => 'required|string|max:255',
+            'type'        => 'required|in:laptop,desktop,monitor,accessory,component',
+            'price'       => 'required|numeric|min:0',
+            'specs'       => 'required|string|max:500',
+            'stock'       => 'integer|min:0',
+            'image'       => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('computers', 'public');
+        }
+
+        $product = ComputerProduct::create($validated);
+        $product->image_url = $product->image ? (filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : asset('storage/' . $product->image)) : null;
+
+        return response()->json($product->load('category'), 201);
+    }
+
+    public function show(ComputerProduct $computerProduct)
+    {
+        $computerProduct->image_url = $computerProduct->image
+            ? (filter_var($computerProduct->image, FILTER_VALIDATE_URL) ? $computerProduct->image : asset('storage/' . $computerProduct->image))
+            : null;
+
+        return response()->json($computerProduct->load('category'));
+    }
+
+    public function update(Request $request, ComputerProduct $computerProduct)
+    {
+        $validated = $request->validate([
+            'category_id' => 'sometimes|exists:categories,id',
+            'name'        => 'sometimes|string|max:255',
+            'brand'       => 'sometimes|string|max:255',
+            'type'        => 'sometimes|in:laptop,desktop,monitor,accessory,component',
+            'price'       => 'sometimes|numeric|min:0',
+            'specs'       => 'sometimes|string|max:500',
+            'stock'       => 'sometimes|integer|min:0',
+            'image'       => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($computerProduct->image) {
+                \Storage::disk('public')->delete($computerProduct->image);
+            }
+            $validated['image'] = $request->file('image')->store('computers', 'public');
+        }
+
+        $computerProduct->update($validated);
+        $computerProduct->image_url = $computerProduct->image ? (filter_var($computerProduct->image, FILTER_VALIDATE_URL) ? $computerProduct->image : asset('storage/' . $computerProduct->image)) : null;
+
+        return response()->json($computerProduct->load('category'));
+    }
+
+    public function destroy(ComputerProduct $computerProduct)
+    {
+        if ($computerProduct->image) {
+            \Storage::disk('public')->delete($computerProduct->image);
+        }
+
+        $computerProduct->delete();
+
+        return response()->json(['message' => 'Computer product deleted successfully.']);
+    }
+}

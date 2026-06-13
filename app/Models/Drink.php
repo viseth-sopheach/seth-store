@@ -17,6 +17,7 @@ class Drink extends Model
         'type',
         'price',
         'stock',
+        'image',
     ];
 
     protected $casts = [
