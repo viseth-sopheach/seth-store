@@ -1,25 +1,83 @@
-const BASE_URL = "http://127.0.0.1:8000/api/drinks";
+const API_URL = "http://127.0.0.1:8000/api";
+const BASE_URL = `${API_URL}/drinks`;
 
-const headers = {
-  "Content-Type": "application/json",
+const baseHeaders = {
   Accept: "application/json",
 };
+
+function getHeaders(isFormData = false) {
+  const token = localStorage.getItem("skybot_token");
+  const headers: Record<string, string> = { ...baseHeaders };
+  
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
+export async function loginUser(
+  email: string,
+  password: string
+): Promise<AuthUser> {
+  const response = await fetch("http://127.0.0.1:8000/api/login", {
+    method: "POST",
+    headers: getHeaders(false),
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || `Login failed: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  localStorage.setItem("skybot_token", data.token);
+  return data.user;
+}
+
+export function logoutUser(): void {
+  localStorage.removeItem("skybot_token");
+}
+
+export async function fetchAuthUser(): Promise<AuthUser> {
+  const response = await fetch("http://127.0.0.1:8000/api/user", {
+    method: "GET",
+    headers: getHeaders(false),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch user: ${response.statusText}`);
+  }
+
+  return response.json();
+}
 
 export interface ProductCategory {
   id: number;
   name: string;
   slug?: string;
   icon?: string;
+  drinks_count?: number;
 }
 
 export interface Product {
   id: number;
   name: string;
   brand?: string;
-  type?: string;
-  specs?: string;
+  type?: string;       // "hot" | "cold" | "alcoholic" | "non-alcoholic"
   price: number;
   stock?: number;
+  category_id?: number;
   image?: string;
   image_url?: string | null;
   category?: ProductCategory | null;
@@ -27,12 +85,50 @@ export interface Product {
   updated_at?: string;
 }
 
-/**
- * GET /api/computer-products
- * Fetch all computer products
- */
+export interface ProductPayload {
+  name: string;
+  brand?: string;
+  type?: string;        // "hot" | "cold" | "alcoholic" | "non-alcoholic"
+  price: number;
+  stock?: number;
+  category_id?: number | null;
+  image?: File | null;
+}
+
+function toFormData(data: ProductPayload, method?: "PUT"): FormData {
+  const formData = new FormData();
+
+  if (method) {
+    formData.append("_method", method);
+  }
+
+  formData.append("name", data.name);
+  formData.append("price", String(data.price));
+
+  if (data.category_id != null) {
+    formData.append("category_id", String(data.category_id));
+  }
+  if (data.brand != null) {
+    formData.append("brand", data.brand);
+  }
+  if (data.type != null) {
+    formData.append("type", data.type);
+  }
+  if (data.stock != null) {
+    formData.append("stock", String(data.stock));
+  }
+  if (data.image) {
+    formData.append("image", data.image);
+  }
+
+  return formData;
+}
+
 export async function getComputerProducts(): Promise<Product[]> {
-  const response = await fetch(BASE_URL, { method: "GET", headers });
+  const response = await fetch(BASE_URL, {
+    method: "GET",
+    headers: getHeaders(false),
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);
@@ -41,12 +137,26 @@ export async function getComputerProducts(): Promise<Product[]> {
   return response.json();
 }
 
-/**
- * GET /api/computer-products/:id
- * Fetch a single computer product by ID
- */
-export async function getComputerProduct(id: number | string): Promise<Product> {
-  const response = await fetch(`${BASE_URL}/${id}`, { method: "GET", headers });
+export async function getCategories(): Promise<ProductCategory[]> {
+  const response = await fetch(`${API_URL}/categories`, {
+    method: "GET",
+    headers: getHeaders(false),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch categories: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function getComputerProduct(
+  id: number | string
+): Promise<Product> {
+  const response = await fetch(`${BASE_URL}/${id}`, {
+    method: "GET",
+    headers: getHeaders(false),
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch product ${id}: ${response.statusText}`);
@@ -55,60 +165,72 @@ export async function getComputerProduct(id: number | string): Promise<Product> 
   return response.json();
 }
 
-/**
- * POST /api/computer-products
- * Create a new computer product
- * @param {Partial<Product>} data - Product payload
- */
-export async function createComputerProduct(data: Partial<Product>): Promise<Product> {
+export async function createComputerProduct(
+  data: ProductPayload
+): Promise<Product> {
   const response = await fetch(BASE_URL, {
     method: "POST",
-    headers,
-    body: JSON.stringify(data),
+    headers: getHeaders(true),
+    body: toFormData(data),
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create product: ${response.statusText}`);
+    const body = await response.json().catch(() => null);
+    const firstError = body?.errors
+      ? Object.values(body.errors as Record<string, string[]>).flat()[0]
+      : body?.message;
+    throw new Error(firstError || `Failed to create: ${response.statusText}`);
   }
 
   return response.json();
 }
 
-/**
- * PUT /api/computer-products/:id
- * Update an existing computer product by ID
- * @param {number|string} id - Product ID
- * @param {Partial<Product>} data - Updated product payload
- */
-export async function updateComputerProduct(id: number | string, data: Partial<Product>): Promise<Product> {
-  const response = await fetch(`${BASE_URL}/${id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify(data),
-  });
+export async function updateComputerProduct(
+  id: number | string,
+  data: ProductPayload
+): Promise<Product> {
+  const response = data.image
+    ? await fetch(`${BASE_URL}/${id}`, {
+        method: "POST",
+        headers: getHeaders(true),
+        body: toFormData(data, "PUT"),
+      })
+    : await fetch(`${BASE_URL}/${id}`, {
+        method: "PUT",
+        headers: getHeaders(false),
+        body: JSON.stringify({
+          name: data.name,
+          price: data.price,
+          category_id: data.category_id,
+          stock: data.stock ?? 0,
+          ...(data.brand ? { brand: data.brand } : {}),
+          ...(data.type ? { type: data.type } : {}),
+        }),
+      });
 
   if (!response.ok) {
-    throw new Error(`Failed to update product ${id}: ${response.statusText}`);
+    const body = await response.json().catch(() => null);
+    const firstError = body?.errors
+      ? Object.values(body.errors as Record<string, string[]>).flat()[0]
+      : body?.message;
+    throw new Error(firstError || `Failed to update: ${response.statusText}`);
   }
 
   return response.json();
 }
 
-/**
- * DELETE /api/computer-products/:id
- * Delete a computer product by ID
- * @param {number|string} id - Product ID
- */
-export async function deleteComputerProduct(id: number | string): Promise<Product | null> {
+export async function deleteComputerProduct(
+  id: number | string
+): Promise<Product | null> {
   const response = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
-    headers,
+    headers: getHeaders(false),
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to delete product ${id}: ${response.statusText}`);
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || `Failed to delete: ${response.statusText}`);
   }
 
-  // 204 No Content — return null, otherwise parse JSON
   return response.status === 204 ? null : response.json();
 }

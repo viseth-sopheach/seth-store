@@ -4,7 +4,14 @@ import {
   deleteComputerProduct,
   createComputerProduct,
   updateComputerProduct,
+  getCategories,
+  loginUser,
+  logoutUser,
+  fetchAuthUser,
   type Product,
+  type ProductPayload,
+  type ProductCategory,
+  type AuthUser,
 } from "../fetchApi/fetchApi";
 
 // ─── Liquid Glass Tokens ──────────────────────────────────────────────────────
@@ -17,6 +24,9 @@ const glassInput =
 
 const glassBtn =
   "bg-white/30 backdrop-blur-md border border-white/50 hover:bg-white/50 transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)]";
+
+const DRINK_TYPES = ["hot", "cold", "alcoholic", "non-alcoholic"] as const;
+type DrinkType = (typeof DRINK_TYPES)[number];
 
 // ─── Badge ────────────────────────────────────────────────────────────────────
 
@@ -40,29 +50,22 @@ function Badge({ stock }: { stock?: number }) {
 
 function ProductCard({
   product,
+  isAdmin,
   onEdit,
   onDelete,
 }: {
   product: Product;
+  isAdmin: boolean;
   onEdit: (p: Product) => void;
   onDelete: (id: number) => void;
 }) {
-  // Fix 1: extract category name safely
-  const categoryName =
-    typeof product.category === "object" && product.category !== null
-      ? product.category.name
-      : typeof product.category === "string"
-      ? product.category
-      : undefined;
-
-  // Fix 2: access specs instead of description (description doesn't exist on Product)
-  const subtitle = product.specs;
+  const categoryName = product.category?.name ?? "";
 
   return (
     <div
       className={`${glass} rounded-3xl overflow-hidden flex flex-col group hover:shadow-[0_16px_48px_rgba(0,0,0,0.12)] hover:bg-white/40 transition-all duration-300`}
     >
-      {/* Image area with ambient blobs */}
+      {/* Image */}
       <div className="relative h-44 flex items-center justify-center bg-linear-to-br from-white/40 to-white/10 border-b border-white/30 overflow-hidden">
         <div className="absolute w-24 h-24 rounded-full bg-blue-300/30 blur-2xl top-2 left-4 group-hover:bg-blue-300/50 transition-colors duration-500 pointer-events-none" />
         <div className="absolute w-20 h-20 rounded-full bg-purple-300/25 blur-2xl bottom-2 right-4 group-hover:bg-purple-300/40 transition-colors duration-500 pointer-events-none" />
@@ -74,7 +77,7 @@ function ProductCard({
           />
         ) : (
           <svg
-            className="w-14 h-14 text-gray-400/60 relative z-10 group-hover:text-gray-500/70 transition-colors duration-300"
+            className="w-14 h-14 text-gray-400/60 relative z-10"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -83,7 +86,7 @@ function ProductCard({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={1.2}
-              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V8l-5-5zM9 3v5h9"
             />
           </svg>
         )}
@@ -99,47 +102,47 @@ function ProductCard({
         <h3 className="text-gray-800 font-semibold text-[15px] leading-snug line-clamp-2">
           {product.name}
         </h3>
-        {subtitle && (
-          <p className="text-gray-500 text-[13px] line-clamp-2 leading-relaxed">
-            {subtitle}
+        {product.brand && (
+          <p className="text-gray-500 text-[13px] leading-relaxed">
+            {product.brand}
           </p>
+        )}
+        {product.type && (
+          <span className="self-start text-[11px] px-2 py-0.5 rounded-full bg-blue-100/60 text-blue-600 border border-blue-200/50 capitalize">
+            {product.type}
+          </span>
         )}
         <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/50">
           <span className="text-gray-800 font-bold text-base tracking-tight">
-            ${Number(product.price).toFixed(2)}
+            ${typeof product.price === "number" ? product.price.toFixed(2) : Number(product.price).toFixed(2)}
           </span>
           <Badge stock={product.stock} />
         </div>
       </div>
 
-      {/* Action row */}
-      <div className="flex border-t border-white/40">
-        <button
-          onClick={() => onEdit(product)}
-          className="flex-1 py-3 text-[13px] text-gray-500 hover:text-blue-600 hover:bg-blue-500/5 transition-all duration-200 font-medium"
-        >
-          Edit
-        </button>
-        <div className="w-px bg-white/40" />
-        <button
-          onClick={() => onDelete(product.id)}
-          className="flex-1 py-3 text-[13px] text-gray-500 hover:text-red-500 hover:bg-red-500/5 transition-all duration-200 font-medium"
-        >
-          Delete
-        </button>
-      </div>
+      {/* Admin actions */}
+      {isAdmin && (
+        <div className="flex border-t border-white/40">
+          <button
+            onClick={() => onEdit(product)}
+            className="flex-1 py-3 text-[13px] text-gray-500 hover:text-blue-600 hover:bg-blue-500/5 transition-all duration-200 font-medium"
+          >
+            Edit
+          </button>
+          <div className="w-px bg-white/40" />
+          <button
+            onClick={() => onDelete(product.id)}
+            className="flex-1 py-3 text-[13px] text-gray-500 hover:text-red-500 hover:bg-red-500/5 transition-all duration-200 font-medium"
+          >
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
-
-// Fix 3: form category is always a plain string; we derive it from product.category
-function getCategoryString(category?: Product["category"]): string {
-  if (!category) return "";
-  if (typeof category === "string") return category;
-  return category.name ?? "";
-}
 
 function Modal({
   initial,
@@ -148,56 +151,110 @@ function Modal({
 }: {
   initial?: Product | null;
   onClose: () => void;
-  onSave: (data: Partial<Product>) => void;
+  onSave: (data: ProductPayload) => Promise<void>;
 }) {
   const [form, setForm] = useState({
-    name: initial?.name ?? "",
-    specs: initial?.specs ?? "",
-    price: initial?.price ?? ("" as number | string),
-    stock: initial?.stock ?? ("" as number | string),
-    // Store category as plain string in the form
-    categoryName: getCategoryString(initial?.category),
+    name:        initial?.name  ?? "",
+    brand:       initial?.brand ?? "",
+    type:        (initial?.type ?? "") as DrinkType | "",
+    price:       initial?.price  != null ? String(initial.price)  : "",
+    stock:       initial?.stock  != null ? String(initial.stock)  : "",
+    category_id: initial?.category?.id != null ? String(initial.category.id) : initial?.category_id != null ? String(initial.category_id) : "",
   });
+  const [saving, setSaving] = useState(false);
+  const [error,  setError]  = useState<string | null>(null);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    initial?.image_url || initial?.image || null
+  );
+  const currentImage = initial?.image_url || initial?.image || null;
+
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      try {
+        setLoadingCategories(true);
+        const data = await getCategories();
+        if (!alive) return;
+        setCategories(Array.isArray(data) ? data : (data as any).data ?? []);
+      } catch (e) {
+        if (alive) {
+          setError(e instanceof Error ? e.message : "Could not load categories.");
+        }
+      } finally {
+        if (alive) {
+          setLoadingCategories(false);
+        }
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const handle = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setError(null);
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  };
 
-  const submit = () => {
-    if (!form.name || !form.price) return;
-    onSave({
-      name: form.name,
-      specs: form.specs || undefined,
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setError(null);
+    setImageFile(file);
+    setImagePreview(file ? URL.createObjectURL(file) : initial?.image_url || initial?.image || null);
+  };
+
+  const submit = async () => {
+    if (!form.name.trim()) {
+      setError("Name is required.");
+      return;
+    }
+    if (!form.price || isNaN(Number(form.price))) {
+      setError("A valid price is required.");
+      return;
+    }
+    if (!form.category_id || isNaN(Number(form.category_id))) {
+      setError("Please select a category.");
+      return;
+    }
+
+    const payload: ProductPayload = {
+      name:  form.name.trim(),
       price: Number(form.price),
-      stock: form.stock !== "" ? Number(form.stock) : undefined,
-      // Pass category as null when empty so the API receives a valid value
-      category: form.categoryName
-        ? ({ name: form.categoryName } as Product["category"])
-        : null,
-    });
+      category_id: Number(form.category_id),
+      ...(form.brand ? { brand: form.brand.trim() } : {}),
+      ...(form.type ? { type: form.type } : {}),
+      ...(form.stock !== "" ? { stock: Number(form.stock) } : { stock: 0 }),
+      ...(imageFile ? { image: imageFile } : {}),
+    };
+
+    setSaving(true);
+    setError(null);
+    try {
+      await onSave(payload);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6"
-      style={{ background: "rgba(180,190,210,0.4)", backdropFilter: "blur(24px)" }}
-    >
-      <div
-        className={`${glass} w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl overflow-hidden`}
-        style={{
-          boxShadow:
-            "0 24px 80px rgba(0,0,0,0.14), 0 0 0 1px rgba(255,255,255,0.55) inset",
-        }}
-      >
-        {/* Mobile drag handle */}
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/30 backdrop-blur-sm">
+      <div className="w-full max-w-2xl overflow-hidden rounded-4xl bg-white/95 shadow-[0_30px_120px_rgba(13,33,75,0.15)] ring-1 ring-white/60 backdrop-blur-xl">
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
           <div className="w-10 h-1 rounded-full bg-gray-300/80" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/40">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-gray-800 font-semibold text-base">
-            {initial ? "Edit Product" : "New Product"}
+            {initial ? "Edit Drink" : "New Drink"}
           </h2>
           <button
             onClick={onClose}
@@ -207,8 +264,13 @@ function Modal({
           </button>
         </div>
 
-        {/* Form fields */}
-        <div className="p-6 flex flex-col gap-4">
+        {error && (
+          <div className="mx-6 mt-4 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <div className="p-6 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
           <div>
             <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
               Name <span className="text-red-400">*</span>
@@ -218,22 +280,40 @@ function Modal({
               value={form.name}
               onChange={handle}
               className={glassInput}
-              placeholder="e.g. RTX 5090"
+              placeholder="e.g. Mineral Water"
             />
           </div>
 
           <div>
             <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
-              Specs
+              Brand
             </label>
-            <textarea
-              name="specs"
-              value={form.specs}
+            <input
+              name="brand"
+              value={form.brand}
               onChange={handle}
-              rows={2}
-              className={`${glassInput} resize-none`}
-              placeholder="Short specs…"
+              className={glassInput}
+              placeholder="e.g. Evian, Coca-Cola…"
             />
+          </div>
+
+          <div>
+            <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
+              Type
+            </label>
+            <select
+              name="type"
+              value={form.type}
+              onChange={handle}
+              className={glassInput}
+            >
+              <option value="">— none —</option>
+              {DRINK_TYPES.map((t) => (
+                <option key={t} value={t} className="capitalize">
+                  {t}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -244,6 +324,8 @@ function Modal({
               <input
                 name="price"
                 type="number"
+                min="0"
+                step="0.01"
                 value={form.price}
                 onChange={handle}
                 className={glassInput}
@@ -257,6 +339,7 @@ function Modal({
               <input
                 name="stock"
                 type="number"
+                min="0"
                 value={form.stock}
                 onChange={handle}
                 className={glassInput}
@@ -267,31 +350,81 @@ function Modal({
 
           <div>
             <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
-              Category
+              Category <span className="text-red-400">*</span>
             </label>
-            <input
-              name="categoryName"
-              value={form.categoryName}
+            <select
+              name="category_id"
+              value={form.category_id}
               onChange={handle}
               className={glassInput}
-              placeholder="GPU, CPU, RAM…"
-            />
+              disabled={loadingCategories}
+            >
+              <option value="">
+                {loadingCategories ? "Loading categories..." : "Select a category"}
+              </option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name} (ID {category.id})
+                </option>
+              ))}
+            </select>
+            {initial?.category && (
+              <p className="text-[11px] text-gray-400 mt-1">
+                Current: <span className="text-blue-500">{initial.category.name}</span> (ID {initial.category.id})
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
+              Image
+            </label>
+            <div className="grid gap-3 sm:grid-cols-[120px_1fr] sm:items-center">
+              <div className="h-28 rounded-2xl overflow-hidden border border-white/50 bg-white/20 flex items-center justify-center">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt={form.name || "Drink preview"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[11px] text-gray-400">No image</span>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={handleImage}
+                className="block w-full text-sm text-gray-600 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-500/80 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-500"
+              />
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                {imageFile
+                  ? `Selected: ${imageFile.name}`
+                  : currentImage
+                  ? "Current database image will stay unless you choose a new file."
+                  : "Choose an image to store with this drink."}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Footer actions — fix 4: removed duplicate pb-6/pb-8 conflict */}
-        <div className="flex gap-3 px-6 pb-8">
+        <div className="flex gap-3 px-6 py-5 border-t border-white/30">
           <button
             onClick={onClose}
-            className={`${glassBtn} flex-1 py-3 rounded-2xl text-gray-500 text-sm font-medium`}
+            disabled={saving}
+            className={`${glassBtn} flex-1 py-3 rounded-2xl text-gray-500 text-sm font-medium disabled:opacity-50`}
           >
             Cancel
           </button>
           <button
             onClick={submit}
-            className="flex-1 py-3 rounded-2xl bg-blue-500/80 backdrop-blur-md hover:bg-blue-500 text-white text-sm font-semibold border border-blue-400/40 shadow-[0_4px_16px_rgba(59,130,246,0.3)] transition-all duration-200"
+            disabled={saving}
+            className="flex-1 py-3 rounded-2xl bg-blue-500/80 backdrop-blur-md hover:bg-blue-500 text-white text-sm font-semibold border border-blue-400/40 shadow-[0_4px_16px_rgba(59,130,246,0.3)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {initial ? "Save Changes" : "Add Product"}
+            {saving && (
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            )}
+            {initial ? "Save Changes" : "Add Drink"}
           </button>
         </div>
       </div>
@@ -302,19 +435,26 @@ function Modal({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DrProduct() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Product | null>(null);
+  const [products,      setProducts]      = useState<Product[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState<string | null>(null);
+  const [search,         setSearch]         = useState("");
+  const [modalOpen,     setModalOpen]     = useState(false);
+  const [editing,       setEditing]       = useState<Product | null>(null);
+  const [user,          setUser]          = useState<AuthUser | null>(null);
+  const [loginOpen,     setLoginOpen]     = useState(false);
+  const [loginEmail,    setLoginEmail]    = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [authError,     setAuthError]     = useState<string | null>(null);
+
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
   const load = async () => {
     try {
       setError(null);
       const data = await getComputerProducts();
       setProducts(
-        Array.isArray(data) ? data : (data as { data: Product[] }).data ?? []
+        Array.isArray(data) ? data : (data as any).data ?? []
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load products.");
@@ -323,37 +463,66 @@ export default function DrProduct() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    (async () => {
+      try {
+        const currentUser = await fetchAuthUser();
+        setUser(currentUser);
+      } catch {
+        logoutUser();
+        setUser(null);
+      }
+    })();
+  }, []);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Delete this product?")) return;
-    await deleteComputerProduct(id);
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const handleLogin = async () => {
+    setAuthError(null);
+    try {
+      const currentUser = await loginUser(loginEmail, loginPassword);
+      setUser(currentUser);
+      setLoginOpen(false);
+      setLoginEmail("");
+      setLoginPassword("");
+    } catch (e) {
+      setAuthError(e instanceof Error ? e.message : "Login failed.");
+    }
   };
 
-  const handleSave = async (data: Partial<Product>) => {
-    if (editing) {
-      const updated = await updateComputerProduct(editing.id, data);
-      setProducts((prev) =>
-        prev.map((p) => (p.id === editing.id ? updated : p))
-      );
-    } else {
-      const created = await createComputerProduct(data);
-      setProducts((prev) => [created, ...prev]);
+  const handleLogout = () => {
+    logoutUser();
+    setUser(null);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this drink?")) return;
+    try {
+      await deleteComputerProduct(id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Delete failed.");
     }
+  };
+
+  const handleSave = async (data: ProductPayload) => {
+    if (editing) {
+      await updateComputerProduct(editing.id, data);
+    } else {
+      await createComputerProduct(data);
+    }
+    await load();
     setModalOpen(false);
     setEditing(null);
   };
 
-  const openAdd = () => { setEditing(null); setModalOpen(true); };
-  const openEdit = (p: Product) => { setEditing(p); setModalOpen(true); };
+  const openAdd  = ()            => { setEditing(null); setModalOpen(true); };
+  const openEdit = (p: Product)  => { setEditing(p);    setModalOpen(true); };
 
-  const filtered = products.filter((p) => {
-    const categoryName = getCategoryString(p.category);
-    return [p.name, categoryName, p.specs]
+  const filtered = products.filter((p) =>
+    [p.name, p.brand, p.type, p.category?.name]
       .filter(Boolean)
-      .some((f) => f!.toLowerCase().includes(search.toLowerCase()));
-  });
+      .some((f) => f!.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
     <div
@@ -363,53 +532,26 @@ export default function DrProduct() {
           "linear-gradient(135deg, #ddeeff 0%, #ede8ff 35%, #fce4ec 65%, #daf4ff 100%)",
       }}
     >
-      {/* Ambient background blobs */}
-      <div
-        className="fixed top-[-15%] left-[-10%] w-[65vw] h-[65vw] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(147,197,253,0.45) 0%, transparent 70%)",
-          filter: "blur(70px)",
-        }}
-      />
-      <div
-        className="fixed bottom-[-15%] right-[-10%] w-[55vw] h-[55vw] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(216,180,254,0.4) 0%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-      />
-      <div
-        className="fixed top-[35%] right-[15%] w-[35vw] h-[35vw] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(252,165,165,0.25) 0%, transparent 70%)",
-          filter: "blur(50px)",
-        }}
-      />
+      <div className="fixed top-[-15%] left-[-10%] w-[65vw] h-[65vw] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(147,197,253,0.45) 0%, transparent 70%)", filter: "blur(70px)" }} />
+      <div className="fixed bottom-[-15%] right-[-10%] w-[55vw] h-[55vw] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(216,180,254,0.4) 0%, transparent 70%)", filter: "blur(60px)" }} />
+      <div className="fixed top-[35%] right-[15%] w-[35vw] h-[35vw] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(252,165,165,0.25) 0%, transparent 70%)", filter: "blur(50px)" }} />
 
-      {/* ── Header ── */}
-      <header
-        className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)] px-4 sm:px-6 py-3"
-      >
+      <header className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)] px-4 sm:px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <h1 className="text-gray-800 font-bold text-lg sm:text-xl tracking-tight leading-tight">
               Drinks
             </h1>
             <p className="text-[12px] text-gray-400 mt-0.5 leading-none">
-              {loading
-                ? "Loading…"
-                : `${products.length} item${products.length !== 1 ? "s" : ""}`}
+              {loading ? "Loading…" : `${products.length} item${products.length !== 1 ? "s" : ""}`}
             </p>
           </div>
 
-          {/* Desktop search */}
           <div className="relative hidden sm:block w-60">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">
-              🔍
-            </span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">🔍</span>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -418,42 +560,54 @@ export default function DrProduct() {
             />
           </div>
 
+          {isAdmin && (
+            <button
+              onClick={openAdd}
+              className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-blue-500/75 backdrop-blur-md hover:bg-blue-500/90 active:scale-95 text-white text-sm font-semibold border border-blue-400/40 shadow-[0_4px_16px_rgba(59,130,246,0.28)] transition-all duration-200"
+            >
+              <span className="text-lg leading-none -mt-0.5">+</span>
+              <span className="hidden sm:inline">Add</span>
+            </button>
+          )}
+
+          {user && (
+            <span className={`hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border backdrop-blur-md ${
+              isAdmin
+                ? "bg-emerald-400/20 text-emerald-700 border-emerald-300/50"
+                : "bg-amber-400/20 text-amber-700 border-amber-300/50"
+            }`}>
+              {user.role}
+            </span>
+          )}
+
           <button
-            onClick={openAdd}
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-blue-500/75 backdrop-blur-md hover:bg-blue-500/90 active:scale-95 text-white text-sm font-semibold border border-blue-400/40 shadow-[0_4px_16px_rgba(59,130,246,0.28)] transition-all duration-200"
+            onClick={user ? handleLogout : () => setLoginOpen(true)}
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-stone-900/90 backdrop-blur-md hover:bg-stone-800/90 active:scale-95 text-white text-sm font-semibold border border-stone-700/40 shadow-[0_4px_16px_rgba(15,23,42,0.28)] transition-all duration-200"
           >
-            <span className="text-lg leading-none -mt-0.5">+</span>
-            <span className="hidden sm:inline">Add</span>
+            {user ? "Logout" : "Login"}
           </button>
         </div>
       </header>
 
-      {/* Mobile search bar */}
       <div className="sm:hidden px-4 pt-4">
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">
-            🔍
-          </span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">🔍</span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products…"
+            placeholder="Search drinks…"
             className={`${glassInput} pl-9`}
           />
         </div>
       </div>
 
-      {/* ── Content ── */}
       <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
-
         {loading && (
           <div className="flex flex-col items-center justify-center py-40 gap-5">
-            <div
-              className={`${glass} w-16 h-16 rounded-2xl flex items-center justify-center`}
-            >
+            <div className={`${glass} w-16 h-16 rounded-2xl flex items-center justify-center`}>
               <div className="w-7 h-7 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="text-gray-400 text-sm">Loading products…</p>
+            <p className="text-gray-400 text-sm">Loading drinks…</p>
           </div>
         )}
 
@@ -474,19 +628,15 @@ export default function DrProduct() {
 
         {!loading && !error && filtered.length === 0 && (
           <div className="flex flex-col items-center py-40 gap-4 text-center">
-            <div
-              className={`${glass} w-20 h-20 rounded-3xl flex items-center justify-center text-4xl`}
-            >
-              {search ? "🔍" : "📦"}
+            <div className={`${glass} w-20 h-20 rounded-3xl flex items-center justify-center text-4xl`}>
+              {search ? "🔍" : "🥤"}
             </div>
             <div>
               <p className="text-gray-600 font-semibold">
-                {search ? `No results for "${search}"` : "No products yet"}
+                {search ? `No results for "${search}"` : "No drinks yet"}
               </p>
-              {!search && (
-                <p className="text-gray-400 text-sm mt-1">
-                  Tap + to add your first product
-                </p>
+              {!search && isAdmin && (
+                <p className="text-gray-400 text-sm mt-1">Tap + to add your first drink</p>
               )}
             </div>
           </div>
@@ -498,6 +648,7 @@ export default function DrProduct() {
               <ProductCard
                 key={product.id}
                 product={product}
+                isAdmin={isAdmin}
                 onEdit={openEdit}
                 onDelete={handleDelete}
               />
@@ -512,6 +663,63 @@ export default function DrProduct() {
           onClose={() => { setModalOpen(false); setEditing(null); }}
           onSave={handleSave}
         />
+      )}
+
+      {loginOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-950/35 backdrop-blur-sm">
+          <div className={`${glass} w-full sm:max-w-md rounded-3xl overflow-hidden`}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/30">
+              <h2 className="text-gray-800 font-semibold text-base">Sign in</h2>
+              <button
+                onClick={() => setLoginOpen(false)}
+                className={`${glassBtn} w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800`}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              {authError && (
+                <div className="rounded-3xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  {authError}
+                </div>
+              )}
+              <div>
+                <label className="text-[11px] text-gray-500 mb-1.5 block uppercase tracking-wider font-medium">Email</label>
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  className={glassInput}
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-500 mb-1.5 block uppercase tracking-wider font-medium">Password</label>
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  className={glassInput}
+                  placeholder="••••••••"
+                />
+              </div>
+              <button
+                onClick={handleLogin}
+                className="w-full py-3 rounded-2xl bg-blue-500/90 text-white text-sm font-semibold hover:bg-blue-500 transition-all duration-200"
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => setLoginOpen(false)}
+                className={`${glassBtn} w-full py-3 rounded-2xl text-sm font-medium text-gray-600`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
