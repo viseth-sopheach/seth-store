@@ -13,6 +13,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // ── 0. Seed users ───────────────────────────────────────────────────
+        $this->call(UserSeeder::class);
+
         // ── 1. Seed categories ──────────────────────────────────────────────
         $categories = [
             ['name' => 'Book',          'slug' => 'book',          'icon' => 'book'],
@@ -85,6 +88,6 @@ class DatabaseSeeder extends Seeder
             PhoneProduct::create(array_merge(['category_id' => $phone->id], $p));
         }
 
-        $this->command->info('✅  Seeded: 4 categories, 5 books, 5 drinks, 5 computer products, 5 phone products with images.');
+        $this->command?->info(' Seeded: 4 categories, 5 books, 5 drinks, 5 computer products, 5 phone products with images.');
     }
 }
