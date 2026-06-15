@@ -8,7 +8,7 @@ const baseHeaders = {
 function getHeaders(isFormData = false) {
   const token = localStorage.getItem("skybot_token");
   const headers: Record<string, string> = { ...baseHeaders };
-  
+
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
@@ -17,6 +17,8 @@ function getHeaders(isFormData = false) {
   }
   return headers;
 }
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export interface AuthUser {
   id: number;
@@ -62,6 +64,8 @@ export async function fetchAuthUser(): Promise<AuthUser> {
   return response.json();
 }
 
+// ─── Categories ───────────────────────────────────────────────────────────────
+
 export interface ProductCategory {
   id: number;
   name: string;
@@ -70,11 +74,13 @@ export interface ProductCategory {
   drinks_count?: number;
 }
 
+// ─── Products ─────────────────────────────────────────────────────────────────
+
 export interface Product {
   id: number;
   name: string;
   brand?: string;
-  type?: string;       // "hot" | "cold" | "alcoholic" | "non-alcoholic"
+  type?: string;
   price: number;
   stock?: number;
   category_id?: number;
@@ -88,41 +94,81 @@ export interface Product {
 export interface ProductPayload {
   name: string;
   brand?: string;
-  type?: string;        // "hot" | "cold" | "alcoholic" | "non-alcoholic"
+  type?: string;
   price: number;
   stock?: number;
   category_id?: number | null;
   image?: File | null;
 }
 
+// ─── Orders ───────────────────────────────────────────────────────────────────
+
+export type ProductType = "drink" | "book" | "computer" | "phone";
+
+export interface OrderPayload {
+  product_type: ProductType;
+  product_id:   number;
+  product_name: string;
+  unit_price:   number;
+  quantity:     number;
+  table_number: string;
+  floor:        string;
+}
+
+export interface Order {
+  id:           number;
+  user_id:      number;
+  product_type: ProductType;
+  product_id:   number;
+  product_name: string;
+  unit_price:   number;
+  quantity:     number;
+  table_number: string;
+  floor:        string;
+  total_price:  number;
+  status:       "pending" | "confirmed" | "delivered" | "cancelled";
+  created_at:   string;
+  updated_at:   string;
+}
+
+export async function placeOrder(payload: OrderPayload): Promise<Order> {
+  const response = await fetch(`${API_URL}/orders`, {
+    method: "POST",
+    headers: getHeaders(false),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    const firstError = body?.errors
+      ? Object.values(body.errors as Record<string, string[]>).flat()[0]
+      : body?.message;
+    throw new Error(firstError || `Failed to place order: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+// ─── FormData helper ──────────────────────────────────────────────────────────
+
 function toFormData(data: ProductPayload, method?: "PUT"): FormData {
   const formData = new FormData();
 
-  if (method) {
-    formData.append("_method", method);
-  }
+  if (method) formData.append("_method", method);
 
-  formData.append("name", data.name);
+  formData.append("name",  data.name);
   formData.append("price", String(data.price));
 
-  if (data.category_id != null) {
-    formData.append("category_id", String(data.category_id));
-  }
-  if (data.brand != null) {
-    formData.append("brand", data.brand);
-  }
-  if (data.type != null) {
-    formData.append("type", data.type);
-  }
-  if (data.stock != null) {
-    formData.append("stock", String(data.stock));
-  }
-  if (data.image) {
-    formData.append("image", data.image);
-  }
+  if (data.category_id != null) formData.append("category_id", String(data.category_id));
+  if (data.brand != null)       formData.append("brand",  data.brand);
+  if (data.type  != null)       formData.append("type",   data.type);
+  if (data.stock != null)       formData.append("stock",  String(data.stock));
+  if (data.image)               formData.append("image",  data.image);
 
   return formData;
 }
+
+// ─── Drink CRUD ───────────────────────────────────────────────────────────────
 
 export async function getComputerProducts(): Promise<Product[]> {
   const response = await fetch(BASE_URL, {
@@ -150,9 +196,7 @@ export async function getCategories(): Promise<ProductCategory[]> {
   return response.json();
 }
 
-export async function getComputerProduct(
-  id: number | string
-): Promise<Product> {
+export async function getComputerProduct(id: number | string): Promise<Product> {
   const response = await fetch(`${BASE_URL}/${id}`, {
     method: "GET",
     headers: getHeaders(false),
@@ -165,9 +209,7 @@ export async function getComputerProduct(
   return response.json();
 }
 
-export async function createComputerProduct(
-  data: ProductPayload
-): Promise<Product> {
+export async function createComputerProduct(data: ProductPayload): Promise<Product> {
   const response = await fetch(BASE_URL, {
     method: "POST",
     headers: getHeaders(true),
@@ -199,12 +241,12 @@ export async function updateComputerProduct(
         method: "PUT",
         headers: getHeaders(false),
         body: JSON.stringify({
-          name: data.name,
-          price: data.price,
+          name:        data.name,
+          price:       data.price,
           category_id: data.category_id,
-          stock: data.stock ?? 0,
+          stock:       data.stock ?? 0,
           ...(data.brand ? { brand: data.brand } : {}),
-          ...(data.type ? { type: data.type } : {}),
+          ...(data.type  ? { type:  data.type  } : {}),
         }),
       });
 
@@ -219,9 +261,7 @@ export async function updateComputerProduct(
   return response.json();
 }
 
-export async function deleteComputerProduct(
-  id: number | string
-): Promise<Product | null> {
+export async function deleteComputerProduct(id: number | string): Promise<Product | null> {
   const response = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
     headers: getHeaders(false),
