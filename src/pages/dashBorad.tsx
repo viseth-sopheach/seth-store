@@ -4,7 +4,7 @@ import type { AuthUser } from "../fetchApi/fetchApi";
 import { MdOutlineDashboard } from "react-icons/md";
 import OrderModal from "./OrderModal";
 
-// ─── Exported Types ───────────────────────────────────────────────────────────
+// ─── Exported Types
 export type OrderStatus = "pending" | "confirmed" | "delivered" | "cancelled";
 export type ProductType = "drink" | "book" | "computer" | "phone";
 
@@ -24,7 +24,6 @@ export interface Order {
   updated_at: string;
 }
 
-// ─── Exported API Helpers ─────────────────────────────────────────────────────
 export const API_URL = "http://127.0.0.1:8000/api";
 
 export function authHeaders(): Record<string, string> {
@@ -53,7 +52,7 @@ export async function deleteOrder(id: number): Promise<void> {
   }
 }
 
-// ─── Local Sub-Components ─────────────────────────────────────────────────────
+// ─── Local Sub-Components
 function Spinner({ size = 20, color = "text-indigo-600" }: { size?: number; color?: string }) {
   return (
     <div
@@ -65,7 +64,7 @@ function Spinner({ size = 20, color = "text-indigo-600" }: { size?: number; colo
 
 function StatCard({ label, value, borderTopClass }: { label: string; value: string | number; borderTopClass: string }) {
   return (
-    <div className={`bg-white border border-gray-200 border-t-4 rounded-xl p-5 min-w-[160px] flex-1 basis-40 ${borderTopClass}`}>
+    <div className={`bg-white border border-gray-200 border-t-4 rounded-xl p-5 min-w-40 flex-1 basis-40 ${borderTopClass}`}>
       <div className="text-2xl font-bold text-gray-900 tracking-tight">{value}</div>
       <div className="text-xs text-gray-500 mt-1 font-medium tracking-widest uppercase">{label}</div>
     </div>
@@ -87,7 +86,7 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main Component
 export default function Dashboard() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -119,8 +118,17 @@ export default function Dashboard() {
     }
   }, []);
 
+  // ✅ Auto-poll every 15 seconds for new orders
   useEffect(() => {
-    if (user?.role === "admin") loadOrders();
+    if (user?.role !== "admin") return;
+
+    loadOrders(); // immediate first load
+
+    const interval = setInterval(() => {
+      loadOrders();
+    }, 15000); // poll every 15 seconds
+
+    return () => clearInterval(interval); // cleanup on unmount
   }, [user, loadOrders]);
 
   async function handleDelete(id: number) {
@@ -205,13 +213,13 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50 font-sans antialiased text-gray-800">
       <header className="bg-white border-b border-gray-200 px-8 h-16 flex items-center justify-between sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm text-white">
+          <div className="w-7 h-7 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm text-white">
             <MdOutlineDashboard />
           </div>
           <span className="font-bold text-base text-gray-900 tracking-tight">Admin Dashboard</span>
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+          <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
             {user.name.charAt(0).toUpperCase()}
           </div>
           <span className="text-sm text-gray-700 font-medium">{user.name}</span>

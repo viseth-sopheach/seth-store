@@ -3,6 +3,7 @@ import BuyModal from "./BuyModal";
 import ProductCard from "./ProductCard";
 import Modal from "./Modal";
 import { FaSearch } from "react-icons/fa";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import {
   getComputerProducts,
   deleteComputerProduct,
@@ -27,10 +28,8 @@ const glassInput =
 const glassBtn =
   "bg-white/30 backdrop-blur-md border border-white/50 hover:bg-white/50 transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)]";
 
-const DRINK_TYPES = ["hot", "cold", "alcoholic", "non-alcoholic"] as const;
-type DrinkType = (typeof DRINK_TYPES)[number];
 
-// ─── Badge ────────────────────────────────────────────────────────────────────
+// ─── Badge 
 
 function Badge({ stock }: { stock?: number }) {
   if (stock === undefined) return null;
@@ -61,6 +60,7 @@ export default function DrProduct() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [buyProduct, setBuyProduct] = useState<Product | null>(null);
 
@@ -182,9 +182,9 @@ export default function DrProduct() {
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)] px-4 sm:px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <div className="flex-1 min-w-0">
+          <div className="px-7 pt-1 flex-1 min-w-0">
             <h1 className="text-gray-800 font-bold text-lg sm:text-xl tracking-tight leading-tight">
-              Drinks
+              Viseth Cafe
             </h1>
             <p className="text-[12px] text-gray-400 mt-0.5 leading-none">
               {loading
@@ -207,7 +207,10 @@ export default function DrProduct() {
 
           {isAdmin && (
             <>
-              <button onClick={() => window.location.href = "/dashboard"} className="bg-cyan-200 rounded-2xl py-2 px-4 border-t-cyan-600">
+              <button
+                onClick={() => (window.location.href = "/dashboard")}
+                className="bg-cyan-200 rounded-2xl py-2 px-4 border-t-cyan-600"
+              >
                 Dashboard
               </button>
               <button
@@ -234,7 +237,7 @@ export default function DrProduct() {
                   : "bg-amber-400/20 text-amber-700 border-amber-300/50"
               }`}
             >
-              {user.role}
+              {user.name}
             </span>
           )}
 
@@ -369,7 +372,7 @@ export default function DrProduct() {
                 </div>
               )}
               <div>
-                <label className="text-[11px] text-gray-500 mb-1.5 block uppercase tracking-wider font-medium">
+                <label className="text-[11px] text-black mb-1.5 block uppercase tracking-wider font-medium">
                   Email
                 </label>
                 <input
@@ -382,17 +385,31 @@ export default function DrProduct() {
                 />
               </div>
               <div>
-                <label className="text-[11px] text-gray-500 mb-1.5 block uppercase tracking-wider font-medium">
+                <label className="text-[11px] text-black mb-1.5 block uppercase tracking-wider font-medium">
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  className={glassInput}
-                  placeholder="••••••••"
-                />
+
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                    className={`${glassInput} pr-10`}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <FiEyeOff size={18} />
+                    ) : (
+                      <FiEye size={18} />
+                    )}
+                  </button>
+                </div>
               </div>
               <button
                 onClick={handleLogin}
