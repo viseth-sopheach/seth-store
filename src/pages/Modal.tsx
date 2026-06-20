@@ -1,13 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, type ChangeEvent } from "react";
 import {
   getCategories,
   type Product,
   type ProductPayload,
   type ProductCategory,
 } from "../fetchApi/fetchApi";
-
-const glass =
-  "bg-white/30 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)]";
 
 const glassInput =
   "w-full bg-white/20 backdrop-blur-md border border-white/50 rounded-2xl px-4 py-2.5 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:border-white/70 focus:bg-white/30 transition-all duration-200 shadow-inner";
@@ -42,6 +39,7 @@ function Modal({
           ? String(initial.category_id)
           : "",
   });
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -50,6 +48,7 @@ function Modal({
   const [imagePreview, setImagePreview] = useState<string | null>(
     initial?.image_url || initial?.image || null,
   );
+
   const currentImage = initial?.image_url || initial?.image || null;
 
   useEffect(() => {
@@ -74,22 +73,51 @@ function Modal({
     };
   }, []);
 
-  const handle = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  // FIX 1: Memoize options map to prevent recalculating on every keystroke
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((c) => (
+        <option key={c.id} value={c.id}>
+          {c.name} (ID {c.id})
+        </option>
+      )),
+    [categories],
+  );
+
+  const drinkTypeOptions = useMemo(
+    () =>
+      DRINK_TYPES.map((t) => (
+        <option key={t} value={t} className="capitalize">
+          {t}
+        </option>
+      )),
+    [],
+  );
+
+  const handle = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setError(null);
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // FIX 2: Properly revoke Object URLs to prevent memory leaks/jank
+  const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     setError(null);
     setImageFile(file);
-    setImagePreview(
-      file
-        ? URL.createObjectURL(file)
-        : initial?.image_url || initial?.image || null,
-    );
+
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+      // Revoke previous preview if it was a blob (not a server URL)
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    } else {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      setImagePreview(currentImage);
+    }
   };
 
   const submit = async () => {
@@ -128,33 +156,37 @@ function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/30 backdrop-blur-sm">
-      <div className="w-full max-w-2xl overflow-hidden rounded-4xl bg-white/95 shadow-[0_30px_120px_rgba(13,33,75,0.15)] ring-1 ring-white/60 backdrop-blur-xl">
+    // FIX 3: Removed heavy backdrop-blur-2xl and bg-black/20 from overlay.
+    // Standard bg-black/40 is hardware-accelerated and won't lag.
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/40">
+      {/* FIX 4: Added will-change-transform to hint the browser to put this on the GPU */}
+      <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white/20 shadow-[0_30px_120px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/40 backdrop-blur-2xl border border-white/30 will-change-transform">
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-gray-300/80" />
+          <div className="w-10 h-1 rounded-full bg-white/40" />
         </div>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-gray-800 font-semibold text-base">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/20">
+          <h2 className="text-white/90 font-semibold text-base drop-shadow-sm">
             {initial ? "Edit Drink" : "New Drink"}
           </h2>
           <button
             onClick={onClose}
-            className={`${glassBtn} w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 text-xs`}
+            className={`${glassBtn} w-8 h-8 rounded-full flex items-center justify-center text-red-700 hover:text-white/90 hover:bg-white/15 text-xs transition-all duration-300`}
           >
             ✕
           </button>
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div className="mx-6 mt-4 rounded-2xl bg-red-500/15 border border-red-400/30 backdrop-blur-md px-4 py-3 text-sm text-red-200 shadow-[inset_0_0_20px_rgba(239,68,68,0.05)]">
             {error}
           </div>
         )}
 
-        <div className="p-6 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+        {/* FIX 5: Changed from max-h-[70vh] to max-h-[60vh] and added will-change-scroll-content */}
+        <div className="p-6 flex flex-col gap-4 max-h-[60vh] overflow-y-auto will-change-scroll-content scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
           <div>
-            <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
-              Name <span className="text-red-400">*</span>
+            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+              Name <span className="text-red-300/80">*</span>
             </label>
             <input
               name="name"
@@ -165,7 +197,7 @@ function Modal({
             />
           </div>
           <div>
-            <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
+            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
               Brand
             </label>
             <input
@@ -177,7 +209,7 @@ function Modal({
             />
           </div>
           <div>
-            <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
+            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
               Type
             </label>
             <select
@@ -187,17 +219,13 @@ function Modal({
               className={glassInput}
             >
               <option value="">— none —</option>
-              {DRINK_TYPES.map((t) => (
-                <option key={t} value={t} className="capitalize">
-                  {t}
-                </option>
-              ))}
+              {drinkTypeOptions}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
-                Price <span className="text-red-400">*</span>
+              <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+                Price <span className="text-red-300/80">*</span>
               </label>
               <input
                 name="price"
@@ -211,7 +239,7 @@ function Modal({
               />
             </div>
             <div>
-              <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
+              <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
                 Stock
               </label>
               <input
@@ -226,8 +254,8 @@ function Modal({
             </div>
           </div>
           <div>
-            <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
-              Category <span className="text-red-400">*</span>
+            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+              Category <span className="text-red-300/80">*</span>
             </label>
             <select
               name="category_id"
@@ -241,43 +269,46 @@ function Modal({
                   ? "Loading categories..."
                   : "Select a category"}
               </option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} (ID {c.id})
-                </option>
-              ))}
+              {categoryOptions}
             </select>
             {initial?.category && (
-              <p className="text-[11px] text-gray-400 mt-1">
+              <p className="text-[11px] text-white/40 mt-1 drop-shadow-sm">
                 Current:{" "}
-                <span className="text-blue-500">{initial.category.name}</span>{" "}
+                <span className="text-blue-300/80">
+                  {initial.category.name}
+                </span>{" "}
                 (ID {initial.category.id})
               </p>
             )}
           </div>
           <div>
-            <label className="text-[11px] text-gray-400 mb-1.5 block uppercase tracking-wider font-medium">
+            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
               Image
             </label>
             <div className="grid gap-3 sm:grid-cols-[120px_1fr] sm:items-center">
-              <div className="h-28 rounded-2xl overflow-hidden border border-white/50 bg-white/20 flex items-center justify-center">
+              <div className="h-28 rounded-2xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_30px_rgba(255,255,255,0.05)]">
                 {imagePreview ? (
+                  // FIX 6: Added loading="lazy" and decoding="async" to prevent image decode blocking the main thread
                   <img
                     src={imagePreview}
                     alt={form.name || "preview"}
                     className="h-full w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
-                  <span className="text-[11px] text-gray-400">No image</span>
+                  <span className="text-[11px] text-white/30 drop-shadow-sm">
+                    No image
+                  </span>
                 )}
               </div>
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/jpg,image/webp"
                 onChange={handleImage}
-                className="block w-full text-sm text-gray-600 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-500/80 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-500"
+                className="block w-full text-sm text-white/60 file:mr-4 file:rounded-xl file:border-0 file:bg-white/20 file:backdrop-blur-md file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white/90 file:border file:border-white/30 hover:file:bg-white/30 file:transition-all file:duration-300 file:cursor-pointer file:shadow-[0_2px_10px_rgba(255,255,255,0.1)]"
               />
-              <p className="text-[11px] text-gray-400 leading-relaxed">
+              <p className="text-[11px] text-white/40 leading-relaxed drop-shadow-sm">
                 {imageFile
                   ? `Selected: ${imageFile.name}`
                   : currentImage
@@ -288,21 +319,21 @@ function Modal({
           </div>
         </div>
 
-        <div className="flex gap-3 px-6 py-5 border-t border-white/30">
+        <div className="flex gap-3 px-6 py-5 border-t border-white/15 bg-white/5 backdrop-blur-sm">
           <button
             onClick={onClose}
             disabled={saving}
-            className={`${glassBtn} flex-1 py-3 rounded-2xl text-gray-500 text-sm font-medium disabled:opacity-50`}
+            className={`${glassBtn} flex-1 py-3 rounded-2xl text-red-700 text-sm font-medium disabled:opacity-50 hover:bg-white/15 hover:text-white/90 transition-all duration-300`}
           >
             Cancel
           </button>
           <button
             onClick={submit}
             disabled={saving}
-            className="flex-1 py-3 rounded-2xl bg-blue-500/80 backdrop-blur-md hover:bg-blue-500 text-white text-sm font-semibold border border-blue-400/40 shadow-[0_4px_16px_rgba(59,130,246,0.3)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 py-3 rounded-2xl bg-white/25 backdrop-blur-md hover:bg-white/35 text-blue-500 text-sm font-semibold border border-white/40 shadow-[0_4px_30px_rgba(255,255,255,0.15)] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-[0_4px_40px_rgba(255,255,255,0.2)] hover:scale-[1.01] active:scale-[0.99]"
           >
             {saving && (
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
             )}
             {initial ? "Save Changes" : "Add Drink"}
           </button>

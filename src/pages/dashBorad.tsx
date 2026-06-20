@@ -212,20 +212,20 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans antialiased text-gray-800">
       <header className="bg-white border-b border-gray-200 px-8 h-16 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm text-white">
+        <div className="px-4 sm:px-6 md:px-8 lg:px-10 flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center text-sm text-white">
             <MdOutlineDashboard />
           </div>
           <span className="font-bold text-base text-gray-900 tracking-tight">Admin Dashboard</span>
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+          {/* <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-xs">
             {user.name.charAt(0).toUpperCase()}
-          </div>
-          <span className="text-sm text-gray-700 font-medium">{user.name}</span>
-          <span className="text-[11px] font-semibold bg-purple-50 text-purple-700 rounded-md px-2 py-0.5 tracking-wider uppercase">
+          </div> */}
+          <span className="bg-green-300 py-2.5 px-2.5 rounded-md text-sm text-gray-700 font-medium">{user.name}</span>
+          {/* <span className="text-[11px] font-semibold bg-purple-50 text-purple-700 rounded-md px-2 py-0.5 tracking-wider uppercase">
             Admin
-          </span>
+          </span> */}
           <button
             onClick={handleLogout}
             className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-stone-900/90 backdrop-blur-md hover:bg-stone-800/90 active:scale-95 text-white text-sm font-semibold border border-stone-700/40 shadow-[0_4px_16px_rgba(15,23,42,0.28)] transition-all duration-200 cursor-pointer"
