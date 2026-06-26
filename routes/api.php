@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::get('/user', [AuthController::class, 'me']);
 });
 
-// ── Categories ────────────────────────────────────────────────────────────
+// ── Categories 
 Route::prefix('categories')->group(function () {
   Route::get('/', [CategoryController::class, 'index']);    // GET /api/categories — public
 
@@ -33,7 +33,7 @@ Route::prefix('categories')->group(function () {
   });
 });
 
-// ── Books ─────────────────────────────────────────────────────────────────
+// ── Books 
 Route::prefix('books')->group(function () {
   Route::get('/', [BookController::class, 'index']);        // GET /api/books — public
 
@@ -45,7 +45,7 @@ Route::prefix('books')->group(function () {
   });
 });
 
-// ── Drinks ────────────────────────────────────────────────────────────────
+// ── Drinks 
 Route::prefix('drinks')->group(function () {
   Route::get('/', [DrinkController::class, 'index']);       // GET /api/drinks — public
 
@@ -58,7 +58,7 @@ Route::prefix('drinks')->group(function () {
   });
 });
 
-// ── Computer Products ─────────────────────────────────────────────────────
+// ── Computer Products 
 Route::prefix('computer-products')->group(function () {
   Route::get('/', [ComputerProductController::class, 'index']);    // GET /api/computer-products — public
 
@@ -70,7 +70,7 @@ Route::prefix('computer-products')->group(function () {
   });
 });
 
-// ── Phone Products ────────────────────────────────────────────────────────
+// ── Phone Products 
 Route::prefix('phone-products')->group(function () {
   Route::get('/', [PhoneProductController::class, 'index']);    // GET /api/phone-products — public
 
