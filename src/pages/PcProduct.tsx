@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BuyModal from "./BuyModal";
 import Modal, { type ComputerPayload } from "./Modal";
 import BackgroundBlobs from "./Backgroundblobs";
@@ -13,11 +13,56 @@ import {
 } from "../api/fetchApi";
 import { getCategoryString } from "./types";
 
+// PcProduct.tsx
+
+const PRODUCTS_CACHE_KEY = "pc_products_cache_v1";
+
+function readProductsCache(): Product[] {
+  try {
+    const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeProductsCache(products: Product[]) {
+  try {
+    localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(products));
+  } catch {}
+}
+
 // ─── PcProduct
 
 export default function PcProduct() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    user,
+    products,
+    setProducts,
+    productsLoaded,
+    setProductsLoaded,
+  } = useNavbarContext();
+
+  // ── Hydrate from localStorage immediately on mount (before fetch), so a
+  // Ctrl+R shows the last-seen grid right away instead of skeletons/spinner.
+  const hydratedRef = useRef(false);
+  if (!hydratedRef.current && products.length === 0) {
+    const cached = readProductsCache();
+    if (cached.length > 0) {
+      setProducts(cached);
+      // Don't mark productsLoaded(true) — a real fetch still runs below
+      // to confirm/refresh this in the background.
+    }
+    hydratedRef.current = true;
+  }
+
+  // `loading` = true only when there's truly nothing to show yet (no live
+  // data, no cache hit). `refreshing` = true for any background refetch —
+  // page shell + existing cards stay mounted throughout.
+  const [loading, setLoading] = useState(!productsLoaded && products.length === 0);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -25,27 +70,42 @@ export default function PcProduct() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [buyProduct, setBuyProduct] = useState<Product | null>(null);
 
-  const { user } = useNavbarContext();
+  const fetchInFlight = useRef(false);
 
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
   const isLoggedIn = user !== null;
 
-  // ── Bootstrap (products only — auth handled by NavbarProvider)
+  // ── Bootstrap — always (re)confirm with a background fetch, but never
+  // block the UI if we already have cached or context data to show.
   useEffect(() => {
-    load();
+    load({ silent: products.length > 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Data loading
+  const load = async ({ silent = true }: { silent?: boolean } = {}) => {
+    if (fetchInFlight.current) return;
+    fetchInFlight.current = true;
 
-  const load = async () => {
     try {
       setError(null);
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const data = await getComputerProducts();
-      setProducts(Array.isArray(data) ? data : ((data as any).data ?? []));
+      const list = Array.isArray(data) ? data : ((data as any).data ?? []);
+      setProducts(list);
+      setProductsLoaded(true);
+      writeProductsCache(list); // keep cache fresh for the next hard reload
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load products.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
+      fetchInFlight.current = false;
     }
   };
 
@@ -55,7 +115,11 @@ export default function PcProduct() {
     if (!confirm("Delete this product?")) return;
     try {
       await deleteComputerProduct(id);
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+      setProducts((prev) => {
+        const next = prev.filter((p) => p.id !== id);
+        writeProductsCache(next);
+        return next;
+      });
     } catch (e) {
       alert(e instanceof Error ? e.message : "Delete failed.");
     }
@@ -67,7 +131,7 @@ export default function PcProduct() {
     } else {
       await createComputerProduct(data as any);
     }
-    await load();
+    await load({ silent: true });
     setModalOpen(false);
     setEditing(null);
   };
@@ -91,17 +155,17 @@ export default function PcProduct() {
       .some((f) => f!.toLowerCase().includes(search.toLowerCase()));
   });
 
-  // ── Publish data to Navbar (rendered once in App.tsx, outside this page) 
+  // ── Publish data to Navbar (rendered once in App.tsx, outside this page)
 
   usePublishNavbarData({
     productCount: products.length,
-    loadingProducts: loading,
+    loadingProducts: loading || refreshing,
     search,
     onSearchChange: setSearch,
     onAdd: isAdmin ? openAdd : undefined,
   });
 
-  // ── Render 
+  // ── Render
 
   return (
     <div
@@ -116,16 +180,16 @@ export default function PcProduct() {
       {/* Main content */}
       <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
         <ProductGrid
-          loading={loading}
+          // Only true when there's no live data AND no cache hit — should be
+          // rare after the first-ever visit on a given browser.
+          loading={loading && products.length === 0}
+          refreshing={refreshing}
           error={error}
           products={filtered}
           search={search}
           isAdmin={isAdmin}
           isLoggedIn={isLoggedIn}
-          onRetry={() => {
-            setLoading(true);
-            load();
-          }}
+          onRetry={() => load({ silent: products.length > 0 })}
           onEdit={openEdit}
           onDelete={handleDelete}
           onBuy={setBuyProduct}

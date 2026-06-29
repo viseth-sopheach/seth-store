@@ -7,8 +7,8 @@ import {
   useRef,
 } from "react";
 import type { ReactNode } from "react";
-import { fetchAuthUser, type AuthUser } from "../api/fetchApi";
-import type { ComputerShopOrder } from "../api/fetchApi";
+import { fetchAuthUser, type AuthUser, } from "../api/fetchApi";
+import type { ComputerShopOrder, Product } from "../api/fetchApi";
 
 interface NavbarData {
   productCount?: number;
@@ -29,6 +29,10 @@ interface NavbarContextValue extends NavbarData {
   setOrders: React.Dispatch<React.SetStateAction<ComputerShopOrder[]>>;
   ordersLoaded: boolean;
   setOrdersLoaded: (v: boolean) => void;
+  products: Product[];
+  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  productsLoaded: boolean;
+  setProductsLoaded: (v: boolean) => void; // ← this was missing
 }
 
 const NavbarContext = createContext<NavbarContextValue | null>(null);
@@ -39,6 +43,8 @@ export function NavbarProvider({ children }: { children: ReactNode }) {
   const [authLoading, setAuthLoading] = useState(true);
   const [orders, setOrders] = useState<ComputerShopOrder[]>([]);
   const [ordersLoaded, setOrdersLoaded] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
 
   const refreshAuth = async () => {
     try {
@@ -61,10 +67,9 @@ export function NavbarProvider({ children }: { children: ReactNode }) {
 
   const setNavbarData = (next: NavbarData) => {
     setData((prev) => {
-      const keys = new Set([
-        ...Object.keys(prev),
-        ...Object.keys(next),
-      ]) as Set<keyof NavbarData>;
+      const keys = new Set([...Object.keys(prev), ...Object.keys(next)]) as Set<
+        keyof NavbarData
+      >;
       for (const key of keys) {
         if (prev[key] !== next[key]) {
           return next;
@@ -77,21 +82,25 @@ export function NavbarProvider({ children }: { children: ReactNode }) {
   const clearNavbarData = () => setData({});
 
   const value = useMemo(
-    () => ({
-      ...data,
-      setNavbarData,
-      clearNavbarData,
-      user,
-      authLoading,
-      setUser,
-      refreshAuth,
-      orders,
-      setOrders,
-      ordersLoaded,
-      setOrdersLoaded,
-    }),
-    [data, user, authLoading, orders, ordersLoaded],
-  );
+  () => ({
+    ...data,
+    setNavbarData,
+    clearNavbarData,
+    user,
+    authLoading,
+    setUser,
+    refreshAuth,
+    orders,
+    setOrders,
+    ordersLoaded,
+    setOrdersLoaded,
+    products,
+    setProducts,
+    productsLoaded,
+    setProductsLoaded,
+  }),
+  [data, user, authLoading, orders, ordersLoaded, products, productsLoaded],
+);
 
   return (
     <NavbarContext.Provider value={value}>{children}</NavbarContext.Provider>
