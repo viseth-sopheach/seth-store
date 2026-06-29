@@ -1,3 +1,4 @@
+import { MdDone } from "react-icons/md";
 import { useState } from "react";
 import { placeComputerShopOrder, type Product } from "../api/fetchApi";
 
@@ -127,7 +128,8 @@ function BuyModal({
   const handleSubmit = async () => {
     setError(null);
     if (!address.trim()) return setError("Please enter your shipping address.");
-    if (!qty || Number(qty) < 1) return setError("Quantity must be at least 1.");
+    if (!qty || Number(qty) < 1)
+      return setError("Quantity must be at least 1.");
 
     setSubmitting(true);
     try {
@@ -143,7 +145,7 @@ function BuyModal({
       setError(
         e instanceof Error
           ? e.message
-          : "Failed to place order. Please try again."
+          : "Failed to place order. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -160,16 +162,18 @@ function BuyModal({
           onClick={onClose}
         />
 
-        <div className={`relative z-10 w-full max-w-xs sm:max-w-sm ${glass.shell}`}>
+        <div
+          className={`relative z-10 w-full max-w-xs sm:max-w-sm ${glass.shell}`}
+        >
           <PrismOverlay />
 
           <div className="relative z-10 flex flex-col items-center gap-5 px-6 sm:px-8 py-10 text-center">
             {/* Success icon */}
-            <div
-              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl ${glass.surface}`}
-            >
-              ✅
-            </div>
+              <div
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl ${glass.surface}`}
+              >
+                <MdDone className="text-emerald-400" />{" "}
+              </div>
 
             <div className="space-y-2">
               <h3 className="text-white font-bold text-xl sm:text-2xl tracking-tight">
@@ -192,7 +196,10 @@ function BuyModal({
               </span>
             </div>
 
-            <button onClick={onClose} className={`w-full ${glass.primaryBtn} py-3.5`}>
+            <button
+              onClick={onClose}
+              className={`w-full ${glass.primaryBtn} py-3.5`}
+            >
               Done
             </button>
           </div>
@@ -222,7 +229,10 @@ function BuyModal({
         <PrismOverlay />
 
         {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3.5 pb-1 sm:hidden" aria-hidden="true">
+        <div
+          className="flex justify-center pt-3.5 pb-1 sm:hidden"
+          aria-hidden="true"
+        >
           <div className="w-10 h-1 rounded-full bg-white/25" />
         </div>
 
@@ -337,7 +347,9 @@ function BuyModal({
             </label>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setQty((q) => String(Math.max(1, Number(q) - 1)))}
+                onClick={() =>
+                  setQty((q) => String(Math.max(1, Number(q) - 1)))
+                }
                 disabled={submitting}
                 className={glass.stepBtn}
                 aria-label="Decrease quantity"
