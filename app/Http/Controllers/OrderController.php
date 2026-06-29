@@ -22,20 +22,6 @@ class OrderController extends Controller
     return response()->json($orders);
   }
 
-  /**
-   * Place a new order from the buy form.
-   *
-   * Expected payload:
-   * {
-   *   "product_type": "drink",        // drink | book | computer | phone
-   *   "product_id":   3,
-   *   "product_name": "Coca-Cola",
-   *   "unit_price":   1.50,
-   *   "quantity":     2,
-   *   "table_number": "12",
-   *   "floor":        "2nd Floor"
-   * }
-   */
   public function store(Request $request)
   {
     $validated = $request->validate([
