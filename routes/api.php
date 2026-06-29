@@ -71,6 +71,20 @@ Route::prefix('computer-products')->group(function () {
   });
 });
 
+Route::prefix('computer-shop-orders')->group(function () {
+  // Authenticated customers — place an order (no admin requirement)
+  Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/', [ComputerShopOrderController::class, 'store']); // POST /api/computer-shop-orders
+  });
+
+  Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/',        [ComputerShopOrderController::class, 'index']);    // GET    /api/computer-shop-orders
+    Route::get('/{id}',    [ComputerShopOrderController::class, 'show']);     // GET    /api/computer-shop-orders/{id}
+    Route::put('/{id}',    [ComputerShopOrderController::class, 'update']);   // PUT    /api/computer-shop-orders/{id}
+    Route::delete('/{id}', [ComputerShopOrderController::class, 'destroy']);  // DELETE /api/computer-shop-orders/{id}
+  });
+});
+
 // ── Phone Products 
 Route::prefix('phone-products')->group(function () {
   Route::get('/', [PhoneProductController::class, 'index']);    // GET /api/phone-products — public
@@ -92,18 +106,4 @@ Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
   Route::get('/{order}',   [OrderController::class, 'show']);          // GET    /api/orders/{id}    — single order
   Route::patch('/{order}/status', [OrderController::class, 'updateStatus']); // PATCH /api/orders/{id}/status — admin update status
   Route::delete('/{order}', [OrderController::class, 'destroy']);       // DELETE /api/orders/{id}   — cancel order
-});
-
-Route::prefix('computer-shop-orders')->group(function () {
-  // Authenticated customers — place an order (no admin requirement)
-  Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/', [ComputerShopOrderController::class, 'store']); // POST /api/computer-shop-orders
-  });
-
-  Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::get('/',        [ComputerShopOrderController::class, 'index']);    // GET    /api/computer-shop-orders
-    Route::get('/{id}',    [ComputerShopOrderController::class, 'show']);     // GET    /api/computer-shop-orders/{id}
-    Route::put('/{id}',    [ComputerShopOrderController::class, 'update']);   // PUT    /api/computer-shop-orders/{id}
-    Route::delete('/{id}', [ComputerShopOrderController::class, 'destroy']);  // DELETE /api/computer-shop-orders/{id}
-  });
 });

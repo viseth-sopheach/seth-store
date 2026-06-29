@@ -10,50 +10,50 @@ use Illuminate\Routing\Controller;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
-    {
-        $data = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+  public function login(Request $request)
+  {
+    $data = $request->validate([
+      'email' => ['required', 'email'],
+      'password' => ['required', 'string'],
+    ]);
 
-        $user = User::where('email', $data['email'])->first();
+    $user = User::where('email', $data['email'])->first();
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials.'], 401);
-        }
-
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role'  => $user->role->value,
-            ],
-        ]);
+    if (! $user || ! Hash::check($data['password'], $user->password)) {
+      return response()->json(['message' => 'Invalid credentials.'], 401);
     }
 
-    public function logout(Request $request)
-    {
-        if ($request->user() && $request->user()->currentAccessToken()) {
-            $request->user()->currentAccessToken()->delete();
-        }
+    $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json(['message' => 'Logged out']);
+    return response()->json([
+      'token' => $token,
+      'user' => [
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'role'  => $user->role->value,
+      ],
+    ]);
+  }
+
+  public function logout(Request $request)
+  {
+    if ($request->user() && $request->user()->currentAccessToken()) {
+      $request->user()->currentAccessToken()->delete();
     }
 
-    public function me(Request $request)
-    {
-        $user = $request->user();
+    return response()->json(['message' => 'Logged out']);
+  }
 
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role'  => $user->role->value,
-        ]);
-    }
+  public function me(Request $request)
+  {
+    $user = $request->user();
+
+    return response()->json([
+      'id' => $user->id,
+      'name' => $user->name,
+      'email' => $user->email,
+      'role'  => $user->role->value,
+    ]);
+  }
 }
