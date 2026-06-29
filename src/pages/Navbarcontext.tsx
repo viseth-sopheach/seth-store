@@ -1,11 +1,14 @@
-import { createContext, useContext, useState, useMemo, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import type { ReactNode } from "react";
-
-// ─── NavbarContext ────────────────────────────────────────────────────────────
-// Navbar is rendered once in App.tsx, outside <Routes>, so it has no direct
-// access to page-level state (product count, search text, +Add handler).
-// This context lets a page (e.g. PcProduct) publish that data, and lets
-// Navbar read it — without prop drilling through App.tsx.
+import { fetchAuthUser, type AuthUser } from "../api/fetchApi";
+import type { ComputerShopOrder } from "../api/fetchApi";
 
 interface NavbarData {
   productCount?: number;
@@ -18,19 +21,76 @@ interface NavbarData {
 interface NavbarContextValue extends NavbarData {
   setNavbarData: (data: NavbarData) => void;
   clearNavbarData: () => void;
+  user: AuthUser | null;
+  authLoading: boolean;
+  setUser: (user: AuthUser | null) => void;
+  refreshAuth: () => Promise<void>;
+  orders: ComputerShopOrder[];
+  setOrders: React.Dispatch<React.SetStateAction<ComputerShopOrder[]>>;
+  ordersLoaded: boolean;
+  setOrdersLoaded: (v: boolean) => void;
 }
 
 const NavbarContext = createContext<NavbarContextValue | null>(null);
 
 export function NavbarProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<NavbarData>({});
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [orders, setOrders] = useState<ComputerShopOrder[]>([]);
+  const [ordersLoaded, setOrdersLoaded] = useState(false);
 
-  const setNavbarData = (next: NavbarData) => setData(next);
+  const refreshAuth = async () => {
+    try {
+      const u = await fetchAuthUser();
+      setUser(u);
+    } catch {
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    refreshAuth().finally(() => setAuthLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const handler = () => refreshAuth();
+    window.addEventListener("auth-change", handler);
+    return () => window.removeEventListener("auth-change", handler);
+  }, []);
+
+  const setNavbarData = (next: NavbarData) => {
+    setData((prev) => {
+      const keys = new Set([
+        ...Object.keys(prev),
+        ...Object.keys(next),
+      ]) as Set<keyof NavbarData>;
+      for (const key of keys) {
+        if (prev[key] !== next[key]) {
+          return next;
+        }
+      }
+      return prev; // identical content -> keep the same reference, no update
+    });
+  };
+
   const clearNavbarData = () => setData({});
 
   const value = useMemo(
-    () => ({ ...data, setNavbarData, clearNavbarData }),
-    [data],
+    () => ({
+      ...data,
+      setNavbarData,
+      clearNavbarData,
+      user,
+      authLoading,
+      setUser,
+      refreshAuth,
+      orders,
+      setOrders,
+      ordersLoaded,
+      setOrdersLoaded,
+    }),
+    [data, user, authLoading, orders, ordersLoaded],
   );
 
   return (
@@ -38,7 +98,6 @@ export function NavbarProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Used by Navbar.tsx to read the published data
 export function useNavbarContext() {
   const ctx = useContext(NavbarContext);
   if (!ctx) {
@@ -47,24 +106,16 @@ export function useNavbarContext() {
   return ctx;
 }
 
-// Used by a page (e.g. PcProduct) to publish its data to Navbar.
-// Automatically clears on unmount so stale data doesn't leak into other pages.
 export function usePublishNavbarData(data: NavbarData) {
   const { setNavbarData, clearNavbarData } = useNavbarContext();
+  const latestData = useRef(data);
+  latestData.current = data;
 
   useEffect(() => {
-    setNavbarData(data);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    data.productCount,
-    data.loadingProducts,
-    data.search,
-    data.onSearchChange,
-    data.onAdd,
-  ]);
+    setNavbarData(latestData.current);
+  }, [data.productCount, data.loadingProducts, data.search]);
 
   useEffect(() => {
     return () => clearNavbarData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

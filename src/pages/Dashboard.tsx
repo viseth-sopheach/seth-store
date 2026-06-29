@@ -1,41 +1,36 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
-import { fetchAuthUser } from "../api/fetchApi";
-import type { AuthUser } from "../api/fetchApi";
 import {
   fetchComputerShopOrders,
   updateComputerShopOrderStatus,
   deleteComputerShopOrder,
-  type ComputerShopOrder,
   type ComputerShopOrderStatus,
 } from "../api/fetchApi";
 import OrderModal from "./OrderModal";
 import Spinner from "./Spinner";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
-// import Navbar from "./Navbar";
+import { useNavbarContext } from "./Navbarcontext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [orders, setOrders] = useState<ComputerShopOrder[]>([]);
+  const {
+    user,
+    authLoading,
+    orders,
+    setOrders,
+    ordersLoaded,
+    setOrdersLoaded,
+  } = useNavbarContext();
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [filterStatus, setFilterStatus] = useState<
+  const [filterStatus, setFilterStatus] = useState <
     ComputerShopOrderStatus | "all"
   >("all");
   const [search, setSearch] = useState("");
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
-
-  useEffect(() => {
-    fetchAuthUser()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setAuthLoading(false));
-  }, []);
 
   const loadOrders = useCallback(async () => {
     setOrdersLoading(true);
@@ -43,17 +38,18 @@ export default function Dashboard() {
     try {
       const data = await fetchComputerShopOrders();
       setOrders(data);
+      setOrdersLoaded(true);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load orders");
     } finally {
       setOrdersLoading(false);
     }
-  }, []);
+  }, [setOrders, setOrdersLoaded]);
 
-  // Auto-poll every 15 seconds for new orders, admins only
   useEffect(() => {
     if (!isAdmin) return;
 
+    setOrdersLoaded(false); 
     loadOrders();
 
     const interval = setInterval(() => {
@@ -61,6 +57,7 @@ export default function Dashboard() {
     }, 15000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, loadOrders]);
 
   async function handleDelete(id: number) {
@@ -95,12 +92,6 @@ export default function Dashboard() {
       .reduce((sum, o) => sum + Number(o.total_price), 0),
   };
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem("skybot_token");
-  //   setUser(null);
-  //   window.location.href = "/";
-  // };
-
   const visible = orders.filter((o) => {
     const matchStatus = filterStatus === "all" || o.status === filterStatus;
     const q = search.toLowerCase();
@@ -113,10 +104,6 @@ export default function Dashboard() {
     );
   });
 
-  // ── Single unified gate ────────────────────────────────────────────────
-  // While auth is still resolving, render NOTHING (not even a spinner) so
-  // there is no frame where the dashboard JSX below can flash for anyone,
-  // admin or not. Only once authLoading is false do we decide what to show.
   if (authLoading) {
     return null;
   }
@@ -155,8 +142,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans antialiased text-gray-800">
-      {/* <Navbar user={user} onLogout={handleLogout} /> */}
-
       <main className="p-8 max-w-7xl mx-auto">
         <div className="flex gap-4 flex-wrap mb-8">
           <StatCard
@@ -247,6 +232,13 @@ export default function Dashboard() {
           )}
 
           <div className="overflow-x-auto">
+            {/* CHANGED: only show the full-page spinner when we have nothing
+                to show yet (orders.length === 0). Otherwise, keep the table
+                visible while a background refresh runs — the table will
+                update in place once loadOrders() resolves. This avoids the
+                "stale data sits there forever because ordersLoaded was true
+                from a previous visit" bug, while also avoiding an
+                unnecessary full-page spinner flash on every revisit. */}
             {ordersLoading && orders.length === 0 ? (
               <div className="p-12 text-center">
                 <Spinner />

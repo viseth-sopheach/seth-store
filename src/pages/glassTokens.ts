@@ -1,4 +1,4 @@
-// ─── Liquid Glass Design Tokens ───────────────────────────────────────────────
+// Liquid Glass Design Tokens
 
 export const glass =
   "bg-white/30 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)]";

@@ -3,16 +3,13 @@ import BuyModal from "./BuyModal";
 import Modal, { type ComputerPayload } from "./Modal";
 import BackgroundBlobs from "./Backgroundblobs";
 import ProductGrid from "./Productgrid";
-import { usePublishNavbarData } from "./Navbarcontext";
+import { usePublishNavbarData, useNavbarContext } from "./Navbarcontext";
 import {
   getComputerProducts,
   deleteComputerProduct,
   createComputerProduct,
   updateComputerProduct,
-  fetchAuthUser,
-  logoutUser,
   type Product,
-  type AuthUser,
 } from "../api/fetchApi";
 import { getCategoryString } from "./types";
 
@@ -28,35 +25,17 @@ export default function PcProduct() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [buyProduct, setBuyProduct] = useState<Product | null>(null);
 
-  // Mirror of auth state — kept in sync via "auth-change" events from Navbar
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const { user } = useNavbarContext();
 
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
   const isLoggedIn = user !== null;
 
-  // ── Bootstrap
+  // ── Bootstrap (products only — auth handled by NavbarProvider)
   useEffect(() => {
     load();
-
-    // Sync initial user
-    fetchAuthUser()
-      .then(setUser)
-      .catch(() => setUser(null));
-
-    // Re-sync whenever Navbar logs in or out
-    const syncUser = () => {
-      fetchAuthUser()
-        .then(setUser)
-        .catch(() => {
-          logoutUser();
-          setUser(null);
-        });
-    };
-    window.addEventListener("auth-change", syncUser);
-    return () => window.removeEventListener("auth-change", syncUser);
   }, []);
 
-  // ── Data loading ──────────────────────────────────────────────────────────
+  // ── Data loading
 
   const load = async () => {
     try {
@@ -70,7 +49,7 @@ export default function PcProduct() {
     }
   };
 
-  // ── CRUD ──────────────────────────────────────────────────────────────────
+  // ── CRUD
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this product?")) return;
@@ -112,7 +91,7 @@ export default function PcProduct() {
       .some((f) => f!.toLowerCase().includes(search.toLowerCase()));
   });
 
-  // ── Publish data to Navbar (rendered once in App.tsx, outside this page) ──
+  // ── Publish data to Navbar (rendered once in App.tsx, outside this page) 
 
   usePublishNavbarData({
     productCount: products.length,
@@ -122,7 +101,7 @@ export default function PcProduct() {
     onAdd: isAdmin ? openAdd : undefined,
   });
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render 
 
   return (
     <div

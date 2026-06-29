@@ -5,7 +5,7 @@ import {
   type ProductCategory,
 } from "../api/fetchApi";
 
-// ─── Shared Payload type (mirrors fetchApi ProductPayload if you have one) ────
+// ─── Shared Payload type (mirrors fetchApi ProductPayload if you have one)
 export interface ComputerPayload {
   name: string;
   brand?: string;
@@ -17,14 +17,14 @@ export interface ComputerPayload {
   image?: File | null;
 }
 
-// ─── Styles (same tokens as drink Modal) ─────────────────────────────────────
+// ─── Styles (same tokens as drink Modal) 
 const glassInput =
   "w-full bg-white/20 backdrop-blur-md border border-white/50 rounded-2xl px-4 py-2.5 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:border-white/70 focus:bg-white/30 transition-all duration-200 shadow-inner";
 
 const glassBtn =
   "bg-white/30 backdrop-blur-md border border-white/50 hover:bg-white/50 transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)]";
 
-// ─── Computer-specific constants ──────────────────────────────────────────────
+// ─── Computer-specific constants 
 const COMPUTER_TYPES = [
   "laptop",
   "desktop",
@@ -34,7 +34,7 @@ const COMPUTER_TYPES = [
 ] as const;
 type ComputerType = (typeof COMPUTER_TYPES)[number];
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+// ─── Modal 
 function Modal({
   initial,
   onClose,
@@ -75,7 +75,7 @@ function Modal({
     (typeof initial?.image === "string" ? initial.image : null) ||
     null;
 
-  // ── Fetch categories ────────────────────────────────────────────────────────
+  // ── Fetch categories 
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -102,7 +102,7 @@ function Modal({
     };
   }, []);
 
-  // ── Memoised <option> lists ─────────────────────────────────────────────────
+  // ── Memoised <option> lists 
   const categoryOptions = useMemo(
     () =>
       categories.map((c) => (
@@ -123,7 +123,7 @@ function Modal({
     [],
   );
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // ── Handlers 
   const handle = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
@@ -146,7 +146,7 @@ function Modal({
     }
   };
 
-  // ── Submit ──────────────────────────────────────────────────────────────────
+  // Submit
   const submit = async () => {
     if (!form.name.trim()) {
       setError("Name is required.");
@@ -185,7 +185,7 @@ function Modal({
     }
   };
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // ── Render 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/40">
       <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white/20 shadow-[0_30px_120px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/40 backdrop-blur-2xl border border-white/30 will-change-transform">

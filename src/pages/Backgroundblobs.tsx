@@ -1,6 +1,3 @@
-// ─── BackgroundBlobs ──────────────────────────────────────────────────────────
-// Purely decorative ambient gradient orbs rendered at a fixed position.
-
 export default function BackgroundBlobs() {
   return (
     <>

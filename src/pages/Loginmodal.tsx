@@ -2,8 +2,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useState } from "react";
 import { glass, glassBtn, glassInput } from "./glassTokens";
 
-// ─── LoginModal ───────────────────────────────────────────────────────────────
-
+// ─── LoginModal 
 interface LoginModalProps {
   onLogin: (email: string, password: string) => Promise<void>;
   onClose: () => void;

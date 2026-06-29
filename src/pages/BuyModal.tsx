@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { placeComputerShopOrder, type Product } from "../api/fetchApi";
 
-// ─── Design Tokens (Liquid Glass System)
-// Core philosophy: multi-layer translucency with chromatic light bending
-// Each surface = frosted pane + inner glow rim + outer shadow moat
+//  Design Tokens (Liquid Glass System)
 
 const glass = {
   // Outer shell – the deepest glass pane
