@@ -1,6 +1,13 @@
-export default function Badge({ stock }: { stock?: number }) {
+
+interface BadgeProps {
+  stock?: number;
+}
+
+export default function Badge({ stock }: BadgeProps) {
   if (stock === undefined) return null;
+
   const inStock = stock > 0;
+
   return (
     <span
       className={`text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md border ${

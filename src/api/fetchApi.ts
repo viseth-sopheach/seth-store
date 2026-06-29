@@ -253,9 +253,8 @@ export interface Order extends OrderPayload {
   created_at?: string;
 }
 
-/**
- * POST /api/orders
- */
+// POST /api/orders
+
 export async function placeOrder(data: OrderPayload): Promise<Order> {
   const response = await fetch("http://127.0.0.1:8000/api/orders", {
     method: "POST",
@@ -270,3 +269,125 @@ export async function placeOrder(data: OrderPayload): Promise<Order> {
 
   return response.json();
 }
+ 
+export const COMPUTER_SHOP_ORDERS_URL = "http://127.0.0.1:8000/api/computer-shop-orders";
+ 
+export type ComputerShopOrderStatus = "pending" | "confirmed" | "delivered" | "cancelled";
+ 
+export interface ComputerShopOrder {
+  id: number;
+  user_id: number;
+  computer_product_id: number;
+  product_name: string;
+  unit_price: number;
+  quantity: number;
+  address: string;
+  total_price: number;
+  status: ComputerShopOrderStatus;
+  created_at: string;
+  updated_at: string;
+}
+ 
+/**
+ * GET /api/computer-shop-orders
+ */
+export async function fetchComputerShopOrders(): Promise<ComputerShopOrder[]> {
+  const response = await fetch(COMPUTER_SHOP_ORDERS_URL, {
+    method: "GET",
+    headers: getHeaders(),
+  });
+ 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
+ 
+  return response.json();
+}
+ 
+/**
+ * GET /api/computer-shop-orders/:id
+ */
+export async function fetchComputerShopOrder(id: number | string): Promise<ComputerShopOrder> {
+  const response = await fetch(`${COMPUTER_SHOP_ORDERS_URL}/${id}`, {
+    method: "GET",
+    headers: getHeaders(),
+  });
+ 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch order ${id}: ${response.statusText}`);
+  }
+ 
+  return response.json();
+}
+ 
+/**
+ * PUT /api/computer-shop-orders/:id
+ * Currently only supports updating `status` (matches controller validation).
+ */
+export async function updateComputerShopOrderStatus(
+  id: number | string,
+  status: ComputerShopOrderStatus
+): Promise<ComputerShopOrder> {
+  const response = await fetch(`${COMPUTER_SHOP_ORDERS_URL}/${id}`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify({ status }),
+  });
+ 
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || `Failed to update order: ${response.statusText}`);
+  }
+ 
+  return response.json();
+}
+ 
+/**
+ * DELETE /api/computer-shop-orders/:id
+ */
+export async function deleteComputerShopOrder(id: number | string): Promise<void> {
+  const response = await fetch(`${COMPUTER_SHOP_ORDERS_URL}/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+ 
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || `Failed to delete order: ${response.statusText}`);
+  }
+}
+ 
+
+// customer buy 
+
+
+export interface PlaceComputerShopOrderPayload {
+  computer_product_id: number;
+  product_name: string;
+  unit_price: number;
+  quantity: number;
+  address: string;
+}
+ 
+/**
+ * POST /api/computer-shop-orders
+ * Places an order against the computer_shop_orders table.
+ * `user_id` and `total_price` are set server-side, not sent from the client.
+ */
+export async function placeComputerShopOrder(
+  data: PlaceComputerShopOrderPayload
+): Promise<ComputerShopOrder> {
+  const response = await fetch(COMPUTER_SHOP_ORDERS_URL, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+ 
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || `Failed to place order: ${response.statusText}`);
+  }
+ 
+  return response.json();
+}
+ 

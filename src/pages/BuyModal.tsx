@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { placeOrder, type Product } from "../api/fetchApi";
+import { placeComputerShopOrder, type Product } from "../api/fetchApi";
 
 // ─── Design Tokens (Liquid Glass System)
 // Core philosophy: multi-layer translucency with chromatic light bending
@@ -133,13 +133,12 @@ function BuyModal({
 
     setSubmitting(true);
     try {
-      await placeOrder({
-        product_type: "computer",
-        product_id: product.id,
+      await placeComputerShopOrder({
+        computer_product_id: product.id,
         product_name: product.name,
         unit_price: price,
         quantity: Number(qty),
-        shipping_address: address.trim(),
+        address: address.trim(),
       });
       setSubmitted(true);
     } catch (e) {
