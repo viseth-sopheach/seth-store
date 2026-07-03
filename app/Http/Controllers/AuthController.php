@@ -10,6 +10,34 @@ use Illuminate\Routing\Controller;
 
 class AuthController extends Controller
 {
+  public function register(Request $request)
+  {
+    $data = $request->validate([
+      'name' => ['required', 'string', 'max:255'],
+      'email' => ['required', 'email', 'unique:users,email'],
+      'password' => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
+
+    $user = User::create([
+      'name' => $data['name'],
+      'email' => $data['email'],
+      'password' => $data['password'],
+    ]);
+
+    $user->refresh();
+
+    $token = $user->createToken('api-token')->plainTextToken;
+
+    return response()->json([
+      'token' => $token,
+      'user' => [
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'role'  => $user->role->value,
+      ],
+    ], 201);
+  }
   public function login(Request $request)
   {
     $data = $request->validate([

@@ -13,6 +13,7 @@ use App\Http\Controllers\PhoneProductController;
 
 Route::controller(AuthController::class)->group(function () {
   Route::post('/login', 'login');
+  Route::post('/register', 'register');
   Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', 'logout');
     Route::get('/user', 'me');
