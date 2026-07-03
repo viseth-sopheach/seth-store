@@ -1,3 +1,4 @@
+import { FaSearch, FaBoxOpen } from "react-icons/fa";
 import type { Product } from "../api/fetchApi";
 import ProductCard from "./ProductCard";
 import { glass, glassBtn } from "./glassTokens";
@@ -70,7 +71,11 @@ export default function ProductGrid({
         <div
           className={`${glass} w-20 h-20 rounded-3xl flex items-center justify-center text-4xl`}
         >
-          {search ? "🔍" : "📦"}
+          {search ? (
+            <FaSearch className="text-gray-500" />
+          ) : (
+            <FaBoxOpen className="text-gray-500" />
+          )}
         </div>
         <div>
           <p className="text-gray-600 font-semibold">

@@ -1,3 +1,4 @@
+import Feedback from "./Feedback";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import {
@@ -6,13 +7,15 @@ import {
   deleteComputerShopOrder,
   type ComputerShopOrderStatus,
 } from "../api/fetchApi";
-import OrderModal from "./OrderModal";
-import Spinner from "./Spinner";
-import StatCard from "./StatCard";
-import StatusBadge from "./StatusBadge";
-import { useNavbarContext } from "./Navbarcontext";
+import OrderModal from "../components/OrderModal";
+import Spinner from "../components/Spinner";
+import StatCard from "../components/StatCard";
+import StatusBadge from "../components/StatusBadge";
+import { useNavbarContext } from "../components/Navbarcontext";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Dashboard() {
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
   const {
     user,
@@ -26,7 +29,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [filterStatus, setFilterStatus] = useState <
+  const [filterStatus, setFilterStatus] = useState<
     ComputerShopOrderStatus | "all"
   >("all");
   const [search, setSearch] = useState("");
@@ -49,7 +52,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!isAdmin) return;
 
-    setOrdersLoaded(false); 
+    setOrdersLoaded(false);
     loadOrders();
 
     const interval = setInterval(() => {
@@ -147,32 +150,32 @@ export default function Dashboard() {
           <StatCard
             label="Total Orders"
             value={stats.total}
-            borderTopClass="border-t-indigo-500"
+            // borderTopClass="border-t-indigo-500"
           />
           <StatCard
             label="Pending"
             value={stats.pending}
-            borderTopClass="border-t-amber-500"
+            // borderTopClass="border-t-amber-500"
           />
           <StatCard
             label="Confirmed"
             value={stats.confirmed}
-            borderTopClass="border-t-blue-500"
+            // borderTopClass="border-t-blue-500"
           />
           <StatCard
             label="Delivered"
             value={stats.delivered}
-            borderTopClass="border-t-emerald-500"
+            // borderTopClass="border-t-emerald-500"
           />
           <StatCard
             label="Cancelled"
             value={stats.cancelled}
-            borderTopClass="border-t-red-500"
+            // borderTopClass="border-t-red-500"
           />
           <StatCard
             label="Revenue (Non-Cancelled)"
             value={`$${stats.revenue.toFixed(2)}`}
-            borderTopClass="border-t-purple-500"
+            // borderTopClass="border-t-purple-500"
           />
         </div>
 
@@ -209,6 +212,23 @@ export default function Dashboard() {
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
               </select>
+
+              <button
+                onClick={() => setShowFeedback((prev) => !prev)}
+                className="rounded-lg bg-gray-900 hover:bg-gray-800 active:bg-gray-950 text-white px-5 py-2.5 text-sm font-medium shadow-sm transition-colors duration-150 flex items-center gap-2"
+              >
+                {showFeedback ? (
+                  <>
+                    <span>Hide Feedback</span>
+                    <ChevronUp className="w-4 h-4" />
+                  </>
+                ) : (
+                  <>
+                    <span>Show Feedback</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </>
+                )}
+              </button>
 
               <button
                 onClick={loadOrders}
@@ -347,6 +367,31 @@ export default function Dashboard() {
           onStatusChange={handleStatusChange}
         />
       )}
+
+      <div className="flex flex-col items-center gap-4">
+        {/* <button
+          onClick={() => setShowFeedback((prev) => !prev)}
+          className="rounded-lg bg-gray-900 hover:bg-gray-800 active:bg-gray-950 text-white px-5 py-2.5 text-sm font-medium shadow-sm transition-colors duration-150 flex items-center gap-2"
+        >
+          {showFeedback ? (
+            <>
+              <span>Hide Feedback</span>
+              <ChevronUp className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              <span>Show Feedback</span>
+              <ChevronDown className="w-4 h-4" />
+            </>
+          )}
+        </button> */}
+
+        {showFeedback && (
+          <div className="w-full flex justify-center animate-in fade-in slide-in-from-top-2 duration-200">
+            <Feedback />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

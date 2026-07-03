@@ -1,24 +1,55 @@
+import Spinner from "./Spinner";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useState } from "react";
 import { glass, glassBtn, glassInput } from "./glassTokens";
 
-// ─── LoginModal 
+// ─── LoginModal
+type AuthMode = "login" | "register";
+
 interface LoginModalProps {
   onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: (name: string, email: string, password: string) => Promise<void>;
   onClose: () => void;
   authError: string | null;
 }
 
 export default function LoginModal({
   onLogin,
+  onRegister,
   onClose,
   authError,
 }: LoginModalProps) {
+  const [mode, setMode] = useState<AuthMode>("login");
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = () => onLogin(email, password);
+  const [loading, setLoading] = useState(false);
+
+  const isLogin = mode === "login";
+
+  const handleSubmit = async () => {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await onLogin(email, password);
+      } else {
+        await onRegister(name, email, password);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMode = (next: AuthMode) => {
+    if (loading) return;
+    setMode(next);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-950/35 backdrop-blur-sm">
@@ -27,7 +58,9 @@ export default function LoginModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/30">
-          <h2 className="text-gray-800 font-semibold text-base">Sign in</h2>
+          <h2 className="text-gray-800 font-semibold text-base">
+            {isLogin ? "Sign in" : "Create account"}
+          </h2>
           <button
             onClick={onClose}
             className={`${glassBtn} w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800`}
@@ -41,6 +74,23 @@ export default function LoginModal({
           {authError && (
             <div className="rounded-3xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {authError}
+            </div>
+          )}
+
+          {/* Name (register only) */}
+          {!isLogin && (
+            <div>
+              <label className="text-[11px] text-black mb-1.5 block uppercase tracking-wider font-medium">
+                Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                className={glassInput}
+                placeholder="Jane Doe"
+              />
             </div>
           )}
 
@@ -85,10 +135,32 @@ export default function LoginModal({
 
           <button
             onClick={handleSubmit}
-            className="w-full py-3 rounded-2xl bg-blue-500/90 text-white text-sm font-semibold hover:bg-blue-500 transition-all duration-200"
+            disabled={loading}
+            className="w-full py-3 rounded-2xl bg-blue-500/90 text-white text-sm font-semibold hover:bg-blue-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Sign in
+            {loading ? (
+              <>
+                {isLogin ? "Signing in..." : "Creating account..."}
+                <Spinner />
+              </>
+            ) : isLogin ? (
+              "Sign in"
+            ) : (
+              "Create account"
+            )}
           </button>
+
+          {/* Switch link */}
+          <p className="text-center text-sm text-gray-600">
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            <button
+              type="button"
+              onClick={() => switchMode(isLogin ? "register" : "login")}
+              className="text-blue-600 font-medium hover:underline"
+            >
+              {isLogin ? "Register" : "Sign in"}
+            </button>
+          </p>
 
           <button
             onClick={onClose}

@@ -1,15 +1,15 @@
 export default function StatCard({
   label,
   value,
-  borderTopClass,
+  // borderTopClass,
 }: {
   label: string;
   value: string | number;
-  borderTopClass: string;
+  // borderTopClass: string;
 }) {
   return (
     <div
-      className={`bg-white border border-gray-200 border-t-4 rounded-xl p-5 min-w-40 flex-1 basis-40 ${borderTopClass}`}
+      className={`bg-white border border-gray-200 border-t-4 rounded-xl p-5 min-w-40 flex-1 basis-40`} //${borderTopClass}
     >
       <div className="text-2xl font-bold text-gray-900 tracking-tight">
         {value}

@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import BuyModal from "./BuyModal";
-import Modal, { type ComputerPayload } from "./Modal";
-import BackgroundBlobs from "./Backgroundblobs";
-import ProductGrid from "./Productgrid";
-import { usePublishNavbarData, useNavbarContext } from "./Navbarcontext";
+import BuyModal from "../components/BuyModal";
+import Modal, { type ComputerPayload } from "../components/Modal";
+import BackgroundBlobs from "../components/Backgroundblobs";
+import ProductGrid from "../components/Productgrid";
+import {
+  usePublishNavbarData,
+  useNavbarContext,
+} from "../components/Navbarcontext";
 import {
   getComputerProducts,
   deleteComputerProduct,
@@ -11,7 +14,10 @@ import {
   updateComputerProduct,
   type Product,
 } from "../api/fetchApi";
-import { getCategoryString } from "./types";
+import { getCategoryString } from "../components/types";
+interface ProductListPageProps {
+  pageType: "laptop" | "desktop" | "accessory";
+}
 
 // PcProduct.tsx
 
@@ -36,14 +42,10 @@ function writeProductsCache(products: Product[]) {
 
 // ─── PcProduct
 
-export default function PcProduct() {
-  const {
-    user,
-    products,
-    setProducts,
-    productsLoaded,
-    setProductsLoaded,
-  } = useNavbarContext();
+export default function PcProduct({pageType}: ProductListPageProps) {
+  
+  const { user, products, setProducts, productsLoaded, setProductsLoaded } =
+    useNavbarContext();
 
   // ── Hydrate from localStorage immediately on mount (before fetch), so a
   // Ctrl+R shows the last-seen grid right away instead of skeletons/spinner.
@@ -61,7 +63,9 @@ export default function PcProduct() {
   // `loading` = true only when there's truly nothing to show yet (no live
   // data, no cache hit). `refreshing` = true for any background refetch —
   // page shell + existing cards stay mounted throughout.
-  const [loading, setLoading] = useState(!productsLoaded && products.length === 0);
+  const [loading, setLoading] = useState(
+    !productsLoaded && products.length === 0,
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -149,6 +153,9 @@ export default function PcProduct() {
   // ── Filtering
 
   const filtered = products.filter((p) => {
+    // Only show products whose `type` matches this page's category
+    if (p.type?.toLowerCase() !== pageType) return false;
+
     const categoryName = getCategoryString(p.category);
     return [p.name, p.brand, p.type, categoryName, p.specs]
       .filter(Boolean)
@@ -171,8 +178,9 @@ export default function PcProduct() {
     <div
       className="min-h-screen font-sans relative overflow-x-hidden"
       style={{
-        background:
-          "linear-gradient(135deg, #ddeeff 0%, #ede8ff 35%, #fce4ec 65%, #daf4ff 100%)",
+        background: "rgba(255, 255, 255, 0.25)",
+        border: "1px solid rgba(255, 255, 255, 0.4)",
+        boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
       }}
     >
       <BackgroundBlobs />

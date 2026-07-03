@@ -390,4 +390,60 @@ export async function placeComputerShopOrder(
  
   return response.json();
 }
- 
+// ─── Feedback 
+
+export interface FeedbackPayload {
+  subject: string;
+  message: string;
+}
+
+export interface Feedback extends FeedbackPayload {
+  id: number;
+  user_id: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * POST /api/feedback
+ */
+export async function sendFeedback(data: FeedbackPayload): Promise<Feedback> {
+  const response = await fetch("http://127.0.0.1:8000/api/feedback", {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || `Failed to send feedback: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function registerUser(
+  name: string,
+  email: string,
+  password: string
+): Promise<AuthUser> {
+  const response = await fetch("http://127.0.0.1:8000/api/register", {
+    method: "POST",
+    headers: baseHeaders,
+    body: JSON.stringify({
+      name,
+      email,
+      password,
+      password_confirmation: password,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || `Registration failed: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  localStorage.setItem('skybot_token', data.token);
+  return data.user;
+}

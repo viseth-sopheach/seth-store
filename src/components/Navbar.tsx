@@ -1,7 +1,8 @@
+import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
-import { loginUser, logoutUser } from "../api/fetchApi";
+import { loginUser, logoutUser, registerUser } from "../api/fetchApi";
 import { glassInput } from "./glassTokens";
 import LoginModal from "./Loginmodal";
 import { useNavbarContext } from "./Navbarcontext";
@@ -48,6 +49,21 @@ export default function Navbar() {
     }
   };
 
+  const handleRegister = async (
+    name: string,
+    email: string,
+    password: string
+  ) => {
+    setAuthError(null);
+    try {
+      await registerUser(name, email, password);
+      window.dispatchEvent(new Event("auth-change"));
+      setLoginOpen(false);
+    } catch (e) {
+      setAuthError(e instanceof Error ? e.message : "Registration failed.");
+    }
+  };
+
   const handleLogout = () => {
     logoutUser();
     setUser(null);
@@ -59,16 +75,14 @@ export default function Navbar() {
     return null;
   }
 
-  // ── Render: single glass header, used on every route (admin and non-admin)
-
   return (
-    <>
+    <div className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)]">
       <header className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)] px-4 sm:px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           {/* LEFT — Title + item count */}
           <div className="flex-1 min-w-0 pl-2">
             <h1 className="text-gray-800 font-bold text-lg sm:text-xl tracking-tight leading-tight">
-              {isDashboard ? "Computer Shop Orders" : "PC Products"}
+              {isDashboard ? "Computer Shop Orders" : "Viseth's Tech"}
             </h1>
             {!isDashboard && (
               <p className="text-[12px] text-gray-400 mt-0.5 leading-none">
@@ -150,20 +164,22 @@ export default function Navbar() {
         </div>
       </header>
 
-      {loginOpen && (
-        <LoginModal
-          onLogin={handleLogin}
-          onClose={() => setLoginOpen(false)}
-          authError={authError}
-        />
-      )}
+      {loginOpen && createPortal(
+     <LoginModal
+       onLogin={handleLogin}
+       onRegister={handleRegister}
+       onClose={() => setLoginOpen(false)}
+       authError={authError}
+     />,
+     document.body
+   )}
 
       {/* Mobile search — only on the products page */}
       {!isDashboard && (
         <div className="sm:hidden px-4 pt-4">
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">
-              🔍
+              <FaSearch/>
             </span>
             <input
               value={search ?? ""}
@@ -174,6 +190,6 @@ export default function Navbar() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
