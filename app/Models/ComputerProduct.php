@@ -8,25 +8,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ComputerProduct extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $fillable = [
-        'category_id',
-        'name',
-        'brand',
-        'type',
-        'price',
-        'specs',
-        'stock',
-        'image',
-    ];
+  protected $fillable = [
+    'category_id',
+    'name',
+    'brand',
+    'type',
+    'price',
+    'specs',
+    'stock',
+    'image',
+  ];
 
-    protected $casts = [
-        'price' => 'decimal:2',
-    ];
+  protected $casts = [
+    'price' => 'decimal:2',
+  ];
 
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
-    }
+  public function category(): BelongsTo
+  {
+    return $this->belongsTo(Category::class);
+  }
 }
