@@ -29,7 +29,7 @@ export default function Sidebar({
   };
 
   return (
-    <div>
+    <div className="md:block md:shrink-0">
       {/* Mobile backdrop */}
       {isOpen && (
         <div
@@ -40,7 +40,7 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`${glass} rounded-none md:rounded-3xl fixed md:sticky top-0 md:top-4 left-0 z-50 md:z-0
+        className={`${glass} rounded-none md:rounded-3xl fixed md:sticky top-0 md:top-4 left-0 z-50 md:z-30
           h-screen md:h-[80vh] w-64 md:w-56 shrink-0 p-4 flex flex-col justify-center items-center gap-4
           transition-transform duration-300 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
