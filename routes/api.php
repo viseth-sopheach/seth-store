@@ -68,10 +68,10 @@ Route::prefix('computer-products')->controller(ComputerProductController::class)
   Route::get('/', 'index');
 
   Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::post('/',       'store');
-    Route::get('/{id}',    'show');
-    Route::put('/{id}',    'update');
-    Route::delete('/{id}', 'destroy');
+    Route::post('/',                 'store');
+    Route::get('/{computerProduct}', 'show');
+    Route::put('/{computerProduct}', 'update');
+    Route::delete('/{computerProduct}', 'destroy');
   });
 });
 
