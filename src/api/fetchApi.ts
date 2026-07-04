@@ -447,3 +447,46 @@ export async function registerUser(
   localStorage.setItem('skybot_token', data.token);
   return data.user;
 }
+
+const API_URL = "http://127.0.0.1:8000/api";
+
+export interface AppUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
+
+export async function fetchUsers(): Promise<AppUser[]> {
+  const res = await fetch(`${API_URL}/users`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${localStorage.getItem("skybot_token")}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch users");
+  const json = await res.json();
+  return json.data ?? json;
+}
+
+export async function updateUserRole(id: number, role: string): Promise<AppUser> {
+  const res = await fetch(`${API_URL}/users/update/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${localStorage.getItem("skybot_token")}`,
+    },
+    body: JSON.stringify({ role: role.toLowerCase() }),
+  });
+  if (!res.ok) {
+    let message = "Failed to update user";
+    try {
+      const body = await res.json();
+      message = body.message ?? message;
+    } catch {}
+    throw new Error(message);
+  }
+  return res.json();
+}
