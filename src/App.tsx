@@ -29,7 +29,7 @@ function AppContent() {
   const isDashboard = location.pathname === "/dashboard";
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans antialiased text-gray-800 flex flex-col">
+    <div className="min-h-screen bg-white font-sans antialiased text-gray-800 flex flex-col">
       <div className="sticky top-0 z-50">
         <Navbar />
       </div>
@@ -44,11 +44,11 @@ function AppContent() {
           {!isDashboard && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden flex items-center gap-2 m-4 px-3 py-2 rounded-2xl bg-white/40 border border-white/50 text-sm font-medium text-gray-700 w-fit"
+              className="md:hidden flex items-center gap-2 m-4 px-3 py-2 rounded-2xl bg-white/40 border border-white/50 text-sm font-bold text-black w-fit"
             >
-              <Menu size={18} />
+              <Menu size={18} className="text-neutral-950" />
               Categories
-            </button>
+            </button> 
           )}
 
           <main className="flex-1 px-4 sm:px-6 lg:px-8 pb-4">

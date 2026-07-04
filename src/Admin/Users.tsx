@@ -3,6 +3,7 @@ import { fetchUsers, updateUserRole } from "../api/fetchApi"; // adjust import p
 import type { AppUser } from "../api/fetchApi";
 
 const ROLES = ["admin", "user"];
+const USERS_CACHE_KEY = "app_users_cache";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -22,22 +23,47 @@ function initials(name: string) {
 }
 
 export default function Users() {
-  const [users, setUsers] = useState<AppUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  // CHANGED: hydrate initial state synchronously from sessionStorage (if
+  // present) so the first render already has data instead of an empty
+  // array + loading spinner.
+  const [users, setUsers] = useState<AppUser[]>(() => {
+    try {
+      const cached = sessionStorage.getItem(USERS_CACHE_KEY);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem(USERS_CACHE_KEY);
+    } catch {
+      return true;
+    }
+  });
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [savingId, setSavingId] = useState<number | null>(null);
 
   useEffect(() => {
     loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadUsers() {
-    setLoading(true);
+    // CHANGED: only show the full loading state if we don't already have
+    // cached data to display — background refresh stays silent.
+    const hasCache = users.length > 0;
+    if (!hasCache) setLoading(true);
     setError(null);
     try {
       const data = await fetchUsers();
       setUsers(data);
+      try {
+        sessionStorage.setItem(USERS_CACHE_KEY, JSON.stringify(data));
+      } catch {
+        // ignore quota/serialization errors, caching is best-effort
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load users");
     } finally {
@@ -49,12 +75,33 @@ export default function Users() {
     const prev = users;
     setSavingId(id);
     // optimistic update
-    setUsers((u) => u.map((usr) => (usr.id === id ? { ...usr, role } : usr)));
+    setUsers((u) => {
+      const next = u.map((usr) => (usr.id === id ? { ...usr, role } : usr));
+      try {
+        sessionStorage.setItem(USERS_CACHE_KEY, JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
     try {
       const updated = await updateUserRole(id, role);
-      setUsers((u) => u.map((usr) => (usr.id === id ? updated : usr)));
+      setUsers((u) => {
+        const next = u.map((usr) => (usr.id === id ? updated : usr));
+        try {
+          sessionStorage.setItem(USERS_CACHE_KEY, JSON.stringify(next));
+        } catch {
+          // ignore
+        }
+        return next;
+      });
     } catch (err) {
       setUsers(prev); // revert on failure
+      try {
+        sessionStorage.setItem(USERS_CACHE_KEY, JSON.stringify(prev));
+      } catch {
+        // ignore
+      }
       setError(err instanceof Error ? err.message : "Failed to update role");
     } finally {
       setSavingId(null);
@@ -70,28 +117,28 @@ export default function Users() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Users</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-slate-900">Users</h1>
             <p className="mt-1 text-sm text-slate-500">
               {loading
                 ? "Loading users…"
-                : `${filtered.length} of ${users.length} users`}
+                : `${users.length} users`}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or email"
-              className="w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              className="w-full sm:w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
             />
             <button
               onClick={loadUsers}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
               Refresh
             </button>
@@ -99,19 +146,19 @@ export default function Users() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-start justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <span>{error}</span>
             <button
               onClick={() => setError(null)}
-              className="ml-4 font-medium hover:underline"
+              className="shrink-0 font-medium hover:underline"
             >
               Dismiss
             </button>
           </div>
         )}
 
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-3 font-medium">User</th>
@@ -160,7 +207,7 @@ export default function Users() {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-xs font-medium text-white">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-400 text-xs font-medium text-white">
                           {initials(user.name)}
                         </div>
                         <span className="font-medium text-slate-900">

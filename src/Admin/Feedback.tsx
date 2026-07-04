@@ -17,6 +17,7 @@ interface FeedbackResponse {
 }
 
 const BASE_URL = "http://127.0.0.1:8000/api/feedback";
+const FEEDBACK_CACHE_KEY = "feedback_cache";
 
 function getHeaders() {
   const token = localStorage.getItem("skybot_token");
@@ -41,26 +42,55 @@ async function fetchFeedbackList(): Promise<FeedbackResponse[]> {
 }
 
 const Feedback = () => {
-  const [feedback, setFeedback] = useState<FeedbackResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  // CHANGED: hydrate initial state synchronously from sessionStorage (if
+  // present) so the first render already has data instead of an empty
+  // array + loading spinner.
+  const [feedback, setFeedback] = useState<FeedbackResponse[]>(() => {
+    try {
+      const cached = sessionStorage.getItem(FEEDBACK_CACHE_KEY);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem(FEEDBACK_CACHE_KEY);
+    } catch {
+      return true;
+    }
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const hasCache = feedback.length > 0;
+    if (!hasCache) setLoading(true);
+
     fetchFeedbackList()
-      .then(setFeedback)
+      .then((data) => {
+        setFeedback(data);
+        try {
+          sessionStorage.setItem(FEEDBACK_CACHE_KEY, JSON.stringify(data));
+        } catch {
+          // ignore quota/serialization errors, caching is best-effort
+        }
+      })
       .catch((err) =>
         setError(
-          err instanceof Error ? err.message : "Failed to load feedback."
-        )
+          err instanceof Error ? err.message : "Failed to load feedback.",
+        ),
       )
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Loading State
   if (loading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <p className="text-sm font-medium text-gray-500 animate-pulse">Loading feedback…</p>
+        <p className="text-sm font-medium text-gray-500 animate-pulse">
+          Loading feedback…
+        </p>
       </div>
     );
   }
@@ -78,7 +108,9 @@ const Feedback = () => {
   if (feedback.length === 0) {
     return (
       <div className="text-center p-12 border border-dashed border-gray-300 rounded-lg max-w-xl mx-auto">
-        <p className="text-sm text-gray-500 font-medium">No feedback submissions found yet.</p>
+        <p className="text-sm text-gray-500 font-medium">
+          No feedback submissions found yet.
+        </p>
       </div>
     );
   }
@@ -100,26 +132,44 @@ const Feedback = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap">
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap"
+                >
                   User
                 </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap">
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap"
+                >
                   Email
                 </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap">
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap"
+                >
                   Subject
                 </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600"
+                >
                   Message
                 </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap">
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap"
+                >
                   Submitted At
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {feedback.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={item.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                     {item.user?.name ?? "—"}
                   </td>
@@ -129,7 +179,6 @@ const Feedback = () => {
                   <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
                     {item.subject}
                   </td>
-                  {/* Gives the message cell structural safety if it spans multiple lines */}
                   <td className="px-6 py-4 text-sm text-gray-600 min-w-[240px] max-w-md break-words">
                     {item.message}
                   </td>

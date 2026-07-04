@@ -77,12 +77,12 @@ export default function ProductGrid({
             <FaBoxOpen className="text-gray-500" />
           )}
         </div>
-        <div>
-          <p className="text-gray-600 font-semibold">
+        <div className="rounded-2xl bg-white/80 px-5 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+          <p className="text-neutral-950 font-bold drop-shadow-[0_1px_0_rgba(255,255,255,0.85)]">
             {search ? `No results for "${search}"` : "No products yet"}
           </p>
           {!search && isAdmin && (
-            <p className="text-gray-400 text-sm mt-1">
+            <p className="text-neutral-800 text-sm font-medium mt-1">
               Tap + to add your first product
             </p>
           )}

@@ -50,14 +50,14 @@ export default function Sidebar({
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="p-1 rounded-lg text-gray-500 hover:bg-white/40"
+            className="p-1 rounded-lg text-neutral-950 hover:bg-white/40"
           >
             <X size={18} />
           </button>
         </div>
 
         <div className="text-center">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-black mb-3">
             Categories
           </h2>
         </div>
@@ -73,8 +73,8 @@ export default function Sidebar({
               className={({ isActive }) =>
                 `flex items-center justify-center gap-3 px-4 py-2 rounded-2xl text-center text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-white/50 text-gray-900 border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-                    : "text-gray-600 hover:bg-white/30 border border-transparent"
+                    ? "bg-white/50 !text-neutral-950 border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+                    : "!text-neutral-950 hover:bg-white/30 border border-transparent"
                 }`
               }
             >
@@ -85,7 +85,7 @@ export default function Sidebar({
                     strokeWidth={isActive ? 2.25 : 1.75}
                     aria-hidden="true"
                   />
-                  <span>{label}</span>
+                  <span style={{ color: "#020617" }}>{label}</span>
                 </>
               )}
             </NavLink>

@@ -84,15 +84,15 @@ export default function Footer() {
           © {new Date().getFullYear()} SOPHAECH VISETH
         </p>
         <div className="flex gap-4 text-gray-400 text-xs">
-          <a href="#" className="hover:text-gray-600">
+          <p className="hover:text-gray-600">
             Privacy
-          </a>
-          <a href="#" className="hover:text-gray-600">
+          </p>
+          <p className="hover:text-gray-600">
             Terms
-          </a>
-          <a href="#" className="hover:text-gray-600">
+          </p>
+          <p className="hover:text-gray-600">
             Contact
-          </a>
+          </p>
         </div>
       </div>
     </footer>
