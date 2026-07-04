@@ -1,5 +1,7 @@
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { type Product } from "../api/fetchApi";
 import { getCategoryString } from "./types";
+import { useState } from "react";
 
 const glassBtn =
   "bg-white/30 backdrop-blur-md border border-white/50 hover:bg-white/50 transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)]";
@@ -42,6 +44,7 @@ export default function ProductCard({
   const price =
     typeof product.price === "number" ? product.price : Number(product.price);
   const outOfStock = (product.stock ?? 0) <= 0;
+  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
     <div className="bg-white/30 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden flex flex-col w-full h-full">
@@ -79,7 +82,9 @@ export default function ProductCard({
         )}
 
         {product.specs && (
-          <p className="text-gray-500 text-xs line-clamp-2 break-words">{product.specs}</p>
+          <p className="text-gray-500 text-xs line-clamp-2 break-words">
+            {product.specs}
+          </p>
         )}
 
         <div className="mt-auto flex items-center justify-between pt-2 gap-2">
@@ -98,7 +103,7 @@ export default function ProductCard({
               Edit
             </button>
             <button
-              onClick={() => onDelete(product.id)}
+              onClick={() => setShowConfirm(true)}
               className={`${glassBtn} flex-1 py-2 rounded-xl text-xs font-medium text-red-600 truncate`}
             >
               Delete
@@ -118,6 +123,16 @@ export default function ProductCard({
           </p>
         )}
       </div>
+      {showConfirm && (
+        <ConfirmDeleteModal
+          productName={product.name}
+          onConfirm={() => {
+            setShowConfirm(false);
+            onDelete(product.id);
+          }}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
     </div>
   );
 }

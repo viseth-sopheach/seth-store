@@ -116,18 +116,17 @@ export default function PcProduct({pageType}: ProductListPageProps) {
   // ── CRUD
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete this product?")) return;
-    try {
-      await deleteComputerProduct(id);
-      setProducts((prev) => {
-        const next = prev.filter((p) => p.id !== id);
-        writeProductsCache(next);
-        return next;
-      });
-    } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed.");
-    }
-  };
+  try {
+    await deleteComputerProduct(id);
+    setProducts((prev) => {
+      const next = prev.filter((p) => p.id !== id);
+      writeProductsCache(next);
+      return next;
+    });
+  } catch (e) {
+    alert(e instanceof Error ? e.message : "Delete failed.");
+  }
+};
 
   const handleSave = async (data: ComputerPayload) => {
     if (editing) {

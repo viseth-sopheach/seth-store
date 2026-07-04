@@ -164,7 +164,7 @@ export default function Navbar() {
 
             <button
               onClick={user ? handleLogout : () => setLoginOpen(true)}
-              className="shrink-0 flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-2xl bg-stone-900/90 backdrop-blur-md hover:bg-stone-800/90 active:scale-95 text-white text-sm font-semibold border border-stone-700/40 shadow-[0_4px_16px_rgba(15,23,42,0.28)] transition-all duration-200 cursor-pointer"
+              className="shrink-0 flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-2xl bg-red-500 backdrop-blur-md hover:bg-red-600/90 active:scale-95 text-white text-sm font-semibold border border-stone-700/40 shadow-[0_4px_16px_rgba(15,23,42,0.28)] transition-all duration-200 cursor-pointer"
             >
               {user ? "Logout" : "Login"}
             </button>
