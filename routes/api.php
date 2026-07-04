@@ -10,6 +10,7 @@ use App\Http\Controllers\ComputerShopOrderController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PhoneProductController;
+use App\Http\Controllers\UserController;
 
 Route::controller(AuthController::class)->group(function () {
   Route::post('/login', 'login');
@@ -101,3 +102,8 @@ Route::prefix('phone-products')->controller(PhoneProductController::class)->grou
 
 Route::middleware('auth:sanctum')->post('/feedback', [FeedbackController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/feedback', [FeedbackController::class, 'index']);
+
+Route::prefix('users')->middleware(['auth:sanctum', 'admin'])->controller(UserController::class)->group(function () {
+  Route::get('/', 'index');
+  Route::put('update/{id}', 'update');
+});
