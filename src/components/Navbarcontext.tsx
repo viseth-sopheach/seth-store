@@ -7,7 +7,7 @@ import {
   useRef,
 } from "react";
 import type { ReactNode } from "react";
-import { fetchAuthUser, type AuthUser, } from "../api/fetchApi";
+import { fetchAuthUser, type AuthUser } from "../api/fetchApi";
 import type { ComputerShopOrder, Product } from "../api/fetchApi";
 
 interface NavbarData {
@@ -82,25 +82,25 @@ export function NavbarProvider({ children }: { children: ReactNode }) {
   const clearNavbarData = () => setData({});
 
   const value = useMemo(
-  () => ({
-    ...data,
-    setNavbarData,
-    clearNavbarData,
-    user,
-    authLoading,
-    setUser,
-    refreshAuth,
-    orders,
-    setOrders,
-    ordersLoaded,
-    setOrdersLoaded,
-    products,
-    setProducts,
-    productsLoaded,
-    setProductsLoaded,
-  }),
-  [data, user, authLoading, orders, ordersLoaded, products, productsLoaded],
-);
+    () => ({
+      ...data,
+      setNavbarData,
+      clearNavbarData,
+      user,
+      authLoading,
+      setUser,
+      refreshAuth,
+      orders,
+      setOrders,
+      ordersLoaded,
+      setOrdersLoaded,
+      products,
+      setProducts,
+      productsLoaded,
+      setProductsLoaded,
+    }),
+    [data, user, authLoading, orders, ordersLoaded, products, productsLoaded],
+  );
 
   return (
     <NavbarContext.Provider value={value}>{children}</NavbarContext.Provider>
@@ -122,7 +122,13 @@ export function usePublishNavbarData(data: NavbarData) {
 
   useEffect(() => {
     setNavbarData(latestData.current);
-  }, [data.productCount, data.loadingProducts, data.search]);
+  }, [
+    data.productCount,
+    data.loadingProducts,
+    data.search,
+    data.onAdd,
+    data.onSearchChange,
+  ]);
 
   useEffect(() => {
     return () => clearNavbarData();

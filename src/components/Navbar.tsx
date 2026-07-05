@@ -134,12 +134,11 @@ export default function Navbar() {
                 </button>
                 {!isDashboard && onAdd && (
                   <button
-                    onClick={onAdd}
-                    className="bg-green-300 w-fit rounded-2xl py-2 px-3 sm:px-4 text-sm font-medium cursor-pointer transition-colors whitespace-nowrap backdrop-blur-sm"
-                  >
-                    <span className="text-lg leading-none -mt-0.5">+</span>
-                    <span className="hidden sm:inline">Add</span>
-                  </button>
+    onClick={onAdd}
+    className="bg-green-300 w-fit rounded-2xl py-2 px-3 sm:px-4 text-sm font-medium cursor-pointer transition-colors whitespace-nowrap backdrop-blur-sm flex items-center gap-1"
+  >
+    <span>+Add</span>
+  </button>
                 )}
               </>
             )}

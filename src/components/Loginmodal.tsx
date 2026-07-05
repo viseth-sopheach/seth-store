@@ -89,7 +89,7 @@ export default function LoginModal({
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                 className={glassInput}
-                placeholder="Jane Doe"
+                placeholder="Viseth"
               />
             </div>
           )}
