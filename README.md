@@ -48,8 +48,8 @@ php artisan serve
 ```
 
 Seeded accounts:
-- `admin@skybot.com` / `password` (admin)
-- `user@skybot.com` / `password` (user)
+- `admin@gmail.com` / `password` (admin)
+- `user@gmail.com` / `password` (user)
 
 ## Notes
 
