@@ -6,7 +6,7 @@ A Laravel REST API powering **Seth Store**, a multi-category e-commerce platform
 
 - **Framework:** Laravel 10
 - **Auth:** Laravel Sanctum (token-based API auth)
-- **Database:** MySQL
+- **Database:** PostgrestSQL
 - **Storage:** Local disk (`storage/app/public`) for product images
 
 ## Features
