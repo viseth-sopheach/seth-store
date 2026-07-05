@@ -41,7 +41,7 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# configure DB_* in .env (MySQL)
+# configure DB_* in .env (PostgrestSQL)
 php artisan migrate --seed
 php artisan storage:link
 php artisan serve
