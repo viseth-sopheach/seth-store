@@ -13,10 +13,10 @@ class DatabaseSeeder extends Seeder
 {
   public function run(): void
   {
-    // ── 0. Seed users 
+    // Seed users 
     $this->call(UserSeeder::class);
 
-    // ── 1. Seed categories
+    // Seed categories
     $categories = [
       ['name' => 'Book',          'slug' => 'book',          'icon' => 'book'],
       ['name' => 'Drink',         'slug' => 'drink',         'icon' => 'coffee'],
@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
     // Test Image URL
     $testImageUrl = 'https://media.istockphoto.com/id/1314343964/photo/top-end-system-unit-for-gaming-computer-close-up.jpg?s=2048x2048&w=is&k=20&c=gz1quan2pGMzCMIYUfzfxCSGgCz0asnPNu0B3rclQTI=';
 
-    // ── 2. Seed books ───────────────────────────────────────────────────
+    // Seed books
     $books = [
       ['title' => 'Clean Code',              'author' => 'Robert C. Martin', 'genre' => 'Technology',  'price' => 39.99, 'stock' => 25, 'image' => $testImageUrl],
       ['title' => 'The Pragmatic Programmer', 'author' => 'Dave Thomas',      'genre' => 'Technology',  'price' => 44.99, 'stock' => 18, 'image' => $testImageUrl],
@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
       Book::create(array_merge(['category_id' => $book->id], $b));
     }
 
-    // ── 3. Seed drinks ──────────────────────────────────────────────────
+    // Seed drinks
     $drinks = [
       ['name' => 'Espresso',       'brand' => 'Nescafe',   'type' => 'hot',          'price' => 2.50,  'stock' => 100, 'image' => $testImageUrl],
       ['name' => 'Green Tea',      'brand' => 'Lipton',    'type' => 'hot',          'price' => 1.99,  'stock' => 80,  'image' => $testImageUrl],
@@ -62,7 +62,7 @@ class DatabaseSeeder extends Seeder
       Drink::create(array_merge(['category_id' => $drink->id], $d));
     }
 
-    // ── 4. Seed computer products ───────────────────────────────────────
+    //Seed computer products
     $computers = [
       ['name' => 'MacBook Pro 14"',    'brand' => 'Apple',  'type' => 'laptop',    'price' => 1999.00, 'specs' => 'M3 Pro, 18GB RAM, 512GB SSD',  'stock' => 10, 'image' => $testImageUrl],
       ['name' => 'Dell XPS 15',        'brand' => 'Dell',   'type' => 'laptop',    'price' => 1599.00, 'specs' => 'Intel i7, 16GB RAM, 1TB SSD',   'stock' => 8,  'image' => $testImageUrl],
@@ -75,7 +75,7 @@ class DatabaseSeeder extends Seeder
       ComputerProduct::create(array_merge(['category_id' => $computer->id], $c));
     }
 
-    // ── 5. Seed phone products ──────────────────────────────────────────
+    // Seed phone products
     $phones = [
       ['name' => 'iPhone 15 Pro',      'brand' => 'Apple',   'type' => 'smartphone', 'price' => 1099.00, 'specs' => '6.1-inch, 256GB, A17 Pro',       'stock' => 20, 'image' => $testImageUrl],
       ['name' => 'Samsung Galaxy S24', 'brand' => 'Samsung', 'type' => 'smartphone', 'price' => 899.00,  'specs' => '6.2-inch, 128GB, 5G',            'stock' => 25, 'image' => $testImageUrl],

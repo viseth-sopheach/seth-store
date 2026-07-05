@@ -7,10 +7,6 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-  /**
-   * List all orders for the authenticated user.
-   * Admins see all orders.
-   */
   public function index(Request $request)
   {
     $user = $request->user();
@@ -43,9 +39,6 @@ class OrderController extends Controller
     return response()->json($order, 201);
   }
 
-  /**
-   * Get a single order (owner or admin only).
-   */
   public function show(Request $request, Order $order)
   {
     $user = $request->user();
@@ -57,9 +50,6 @@ class OrderController extends Controller
     return response()->json($order->load('user'));
   }
 
-  /**
-   * Update order status (admin only).
-   */
   public function updateStatus(Request $request, Order $order)
   {
     if (! $request->user()->isAdmin()) {
@@ -75,9 +65,6 @@ class OrderController extends Controller
     return response()->json($order);
   }
 
-  /**
-   * Cancel an order (owner or admin).
-   */
   public function destroy(Request $request, Order $order)
   {
     $user = $request->user();

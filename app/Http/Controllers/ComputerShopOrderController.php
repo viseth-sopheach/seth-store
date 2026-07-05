@@ -8,11 +8,6 @@ use Illuminate\Validation\Rule;
 
 class ComputerShopOrderController extends Controller
 {
-  /**
-   * POST /api/computer-shop-orders
-   * Authenticated customers — place a new order.
-   * total_price and user_id are computed/assigned server-side, never trusted from the client.
-   */
   public function store(Request $request)
   {
     $validated = $request->validate([
@@ -37,28 +32,16 @@ class ComputerShopOrderController extends Controller
     return response()->json($order, 201);
   }
 
-  /**
-   * GET /api/computer-shop-orders
-   * Admin only — list all orders, most recent first.
-   */
   public function index()
   {
     return ComputerShopOrder::orderByDesc('created_at')->get();
   }
 
-  /**
-   * GET /api/computer-shop-orders/{id}
-   * Admin only — view a single order.
-   */
   public function show(string $id)
   {
     return ComputerShopOrder::findOrFail($id);
   }
 
-  /**
-   * PUT /api/computer-shop-orders/{id}
-   * Admin only — update order status (e.g. pending -> confirmed -> delivered).
-   */
   public function update(Request $request, string $id)
   {
     $order = ComputerShopOrder::findOrFail($id);
@@ -72,10 +55,7 @@ class ComputerShopOrderController extends Controller
     return $order;
   }
 
-  /**
-   * DELETE /api/computer-shop-orders/{id}
-   * Admin only — cancel/delete an order.
-   */
+
   public function destroy(string $id)
   {
     $order = ComputerShopOrder::findOrFail($id);

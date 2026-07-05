@@ -25,10 +25,8 @@ return new class extends Migration
       $table->unsignedInteger('quantity')->default(1);
       $table->string('address');
 
-      // Computed total
       $table->decimal('total_price', 10, 2);
 
-      // Order status
       $table->enum('status', ['pending', 'confirmed', 'delivered', 'cancelled'])
         ->default('pending');
 

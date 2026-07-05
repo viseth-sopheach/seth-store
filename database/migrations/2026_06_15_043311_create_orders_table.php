@@ -14,9 +14,9 @@ return new class extends Migration
       // Who ordered
       $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
-      // What they ordered (polymorphic-style: store the product type + id)
-      $table->string('product_type');           // e.g. "drink", "book", "computer", "phone"
-      $table->unsignedBigInteger('product_id'); // the id in the respective table
+      // What customer ordered
+      $table->string('product_type');
+      $table->unsignedBigInteger('product_id');
 
       // Product snapshot at time of order (so data stays accurate even if product changes)
       $table->string('product_name');

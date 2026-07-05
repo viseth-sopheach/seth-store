@@ -6,23 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::create('phone_products', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->string('brand');
-            $table->enum('type', ['smartphone', 'tablet', 'accessory', 'smartwatch']);
-            $table->decimal('price', 10, 2);
-            $table->string('specs');          // e.g. "6.7-inch, 128GB, 5G"
-            $table->integer('stock')->default(0);
-            $table->timestamps();
-        });
-    }
+  public function up(): void
+  {
+    Schema::create('phone_products', function (Blueprint $table) {
+      $table->id();
+      $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+      $table->string('name');
+      $table->string('brand');
+      $table->enum('type', ['smartphone', 'tablet', 'accessory', 'smartwatch']);
+      $table->decimal('price', 10, 2);
+      $table->string('specs');
+      $table->integer('stock')->default(0);
+      $table->timestamps();
+    });
+  }
 
-    public function down(): void
-    {
-        Schema::dropIfExists('phone_products');
-    }
+  public function down(): void
+  {
+    Schema::dropIfExists('phone_products');
+  }
 };

@@ -26,10 +26,8 @@ return new class extends Migration
       $table->string('table_number');
       $table->string('floor');
 
-      // Computed total
       $table->decimal('total_price', 10, 2);
 
-      // Order status
       $table->enum('status', ['pending', 'confirmed', 'delivered', 'cancelled'])
         ->default('pending');
 
