@@ -1,17 +1,53 @@
 export function BookCard({ book, onBorrow, borrowing }) {
   return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, textAlign: 'left' }}>
+    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
       {book.image_url && (
-        <img src={book.image_url} alt={book.title} style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 4 }} />
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900">
+          <img
+            src={book.image_url}
+            alt={book.title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
       )}
-      <h3 style={{ margin: '12px 0 4px' }}>{book.title}</h3>
-      <p style={{ margin: 0, color: 'var(--text)' }}>{book.author} · {book.genre}</p>
-      <p style={{ margin: '8px 0' }}>${Number(book.price).toFixed(2)} · {book.stock} in stock</p>
-      {onBorrow && (
-        <button type="button" onClick={() => onBorrow(book)} disabled={book.stock < 1 || borrowing}>
-          {book.stock < 1 ? 'Out of stock' : borrowing ? 'Borrowing…' : 'Borrow'}
-        </button>
-      )}
+
+      <div className="flex flex-1 flex-col pt-3">
+        <h3 className="line-clamp-1 font-semibold text-slate-900 dark:text-slate-50 text-base tracking-tight">
+          {book.title}
+        </h3>
+
+        <p className="mt-1 line-clamp-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+          {book.author}{" "}
+          <span className="mx-1 text-slate-300 dark:text-slate-700">·</span>{" "}
+          {book.genre}
+        </p>
+
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-900">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-slate-900 dark:text-slate-50">
+              ${Number(book.price).toFixed(2)}
+            </span>
+            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+              {book.stock} left
+            </span>
+          </div>
+
+          {onBorrow && (
+            <button
+              type="button"
+              onClick={() => onBorrow(book)}
+              disabled={book.stock < 1 || borrowing}
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-slate-900 px-3.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:pointer-events-none disabled:bg-slate-100 disabled:text-slate-400 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200 dark:focus-visible:outline-slate-50 dark:disabled:bg-slate-900 dark:disabled:text-slate-600"
+            >
+              {book.stock < 1
+                ? "Out of stock"
+                : borrowing
+                  ? "Borrowing…"
+                  : "Borrow"}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
-  )
+  );
 }
