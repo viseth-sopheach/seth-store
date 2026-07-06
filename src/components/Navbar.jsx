@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export function Navbar() {
@@ -10,34 +10,33 @@ export function Navbar() {
     navigate("/login");
   }
 
+  const linkClass = ({ isActive }) =>
+    [
+      "transition-colors",
+      isActive
+        ? "text-slate-900 dark:text-slate-50 font-semibold"
+        : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50",
+    ].join(" ");
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Navigation Links */}
         <div className="flex items-center gap-6 text-sm font-medium">
-          <Link
-            to="/"
-            className="text-slate-900 transition-colors hover:text-slate-600 dark:text-slate-50 dark:hover:text-slate-300"
-          >
+          <NavLink to="/" end className={linkClass}>
             Books
-          </Link>
+          </NavLink>
 
           {user && (
-            <Link
-              to="/my-borrows"
-              className="text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
-            >
+            <NavLink to="/my-borrows" className={linkClass}>
               My Borrows
-            </Link>
+            </NavLink>
           )}
 
           {isAdmin && (
-            <Link
-              to="/admin/books"
-              className="text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
-            >
+            <NavLink to="/admin/books" className={linkClass}>
               Manage Books
-            </Link>
+            </NavLink>
           )}
         </div>
 
@@ -59,19 +58,26 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link
+              <NavLink
                 to="/login"
-                className="font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
+                className={({ isActive }) =>
+                  [
+                    "font-medium transition-colors",
+                    isActive
+                      ? "text-slate-900 dark:text-slate-50"
+                      : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50",
+                  ].join(" ")
+                }
               >
                 Log in
-              </Link>
+              </NavLink>
 
-              <Link
+              <NavLink
                 to="/register"
                 className="inline-flex h-9 items-center justify-center rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 Register
-              </Link>
+              </NavLink>
             </>
           )}
         </div>
