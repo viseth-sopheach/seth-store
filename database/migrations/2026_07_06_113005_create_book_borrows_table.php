@@ -6,18 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-  /**
-   * Run the migrations.
-   *
-   * Rebuilds book_borrows with a request/approval workflow:
-   *  - status now supports pending -> approved -> returned, plus rejected/cancelled
-   *  - borrowed_at / due_date are only populated once an admin approves the request
-   *  - approved_at records when the approval happened
-   *
-   * The table is dropped and recreated (rather than altered) to avoid
-   * cross-database enum/check-constraint migration issues; this feature
-   * has no production data yet.
-   */
   public function up(): void
   {
     Schema::dropIfExists('book_borrows');
