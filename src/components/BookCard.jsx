@@ -18,8 +18,6 @@ export function BookCard({ book, onBorrow, borrowing }) {
 
         <p className="mt-1 line-clamp-1 text-xs font-medium text-slate-500 dark:text-slate-400">
           {book.author}{" "}
-          <span className="mx-1 text-slate-300 dark:text-slate-700">·</span>{" "}
-          {book.genre}
         </p>
 
         <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-900">
