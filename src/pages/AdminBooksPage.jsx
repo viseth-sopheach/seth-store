@@ -14,6 +14,7 @@ export function AdminBooksPage() {
   const [books, setBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [imageFile, setImageFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -37,6 +38,7 @@ export function AdminBooksPage() {
 
   function startEdit(book) {
     setEditingId(book.id);
+    setImageFile(null);
     setForm({
       category_id: book.category_id,
       title: book.title,
@@ -49,6 +51,7 @@ export function AdminBooksPage() {
 
   function cancelEdit() {
     setEditingId(null);
+    setImageFile(null);
     setForm(emptyForm);
   }
 
@@ -57,10 +60,21 @@ export function AdminBooksPage() {
     setError(null);
     setSaving(true);
     try {
+      const data = new FormData();
+      data.append("category_id", form.category_id);
+      data.append("title", form.title);
+      data.append("author", form.author);
+      data.append("price", form.price);
+      data.append("stock", form.stock);
+      if (form.description) data.append("description", form.description);
+      if (imageFile) data.append("image", imageFile);
+
       if (editingId) {
-        await api.put(`/books/${editingId}`, form);
+        // PHP won't parse a raw PUT multipart body, so spoof it as POST
+        data.append("_method", "PUT");
+        await api.post(`/books/${editingId}`, data);
       } else {
-        await api.post("/books", form);
+        await api.post("/books", data);
       }
       cancelEdit();
       load();
@@ -158,12 +172,13 @@ export function AdminBooksPage() {
             onChange={update("stock")}
             className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
           />
+
           <input
+            key={editingId ?? "new"}
             type="file"
-            placeholder="Image"
-            value={form.image}
-            onChange={update("image")}
-            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors file:mr-3 file:h-full file:border-0 file:bg-transparent file:text-sm file:font-medium focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:focus:border-slate-50 dark:focus:bg-slate-950"
           />
 
           <textarea

@@ -160,14 +160,14 @@ export function MyBorrowsPage() {
                           >
                             Return
                           </button>
-                          <button
+                          {/* <button
                             type="button"
                             disabled={busyId === b.id}
                             onClick={() => handleCancel(b)}
                             className="inline-flex h-8 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
                           >
                             Cancel
-                          </button>
+                          </button> */}
                         </div>
                       )}
                     </td>
