@@ -27,7 +27,7 @@ export interface Order {
 export const API_URL = "http://127.0.0.1:8000/api";
 
 export function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem("skybot_token");
+  const token = localStorage.getItem("seth_token");
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -48,12 +48,20 @@ export async function deleteOrder(id: number): Promise<void> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new Error(body?.message || `Failed to delete order: ${res.statusText}`);
+    throw new Error(
+      body?.message || `Failed to delete order: ${res.statusText}`,
+    );
   }
 }
 
 // ─── Local Sub-Components
-function Spinner({ size = 20, color = "text-indigo-600" }: { size?: number; color?: string }) {
+function Spinner({
+  size = 20,
+  color = "text-indigo-600",
+}: {
+  size?: number;
+  color?: string;
+}) {
   return (
     <div
       className={`animate-spin inline-block rounded-full border-2 border-current border-t-transparent ${color}`}
@@ -62,25 +70,57 @@ function Spinner({ size = 20, color = "text-indigo-600" }: { size?: number; colo
   );
 }
 
-function StatCard({ label, value, borderTopClass }: { label: string; value: string | number; borderTopClass: string }) {
+function StatCard({
+  label,
+  value,
+  borderTopClass,
+}: {
+  label: string;
+  value: string | number;
+  borderTopClass: string;
+}) {
   return (
-    <div className={`bg-white border border-gray-200 border-t-4 rounded-xl p-5 min-w-40 flex-1 basis-40 ${borderTopClass}`}>
-      <div className="text-2xl font-bold text-gray-900 tracking-tight">{value}</div>
-      <div className="text-xs text-gray-500 mt-1 font-medium tracking-widest uppercase">{label}</div>
+    <div
+      className={`bg-white border border-gray-200 border-t-4 rounded-xl p-5 min-w-40 flex-1 basis-40 ${borderTopClass}`}
+    >
+      <div className="text-2xl font-bold text-gray-900 tracking-tight">
+        {value}
+      </div>
+      <div className="text-xs text-gray-500 mt-1 font-medium tracking-widest uppercase">
+        {label}
+      </div>
     </div>
   );
 }
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
   const STATUS_META = {
-    pending: { label: "Pending", textClass: "text-amber-700", bgClass: "bg-amber-100" },
-    confirmed: { label: "Confirmed", textClass: "text-blue-700", bgClass: "bg-blue-100" },
-    delivered: { label: "Delivered", textClass: "text-emerald-700", bgClass: "bg-emerald-100" },
-    cancelled: { label: "Cancelled", textClass: "text-red-700", bgClass: "bg-red-100" },
+    pending: {
+      label: "Pending",
+      textClass: "text-amber-700",
+      bgClass: "bg-amber-100",
+    },
+    confirmed: {
+      label: "Confirmed",
+      textClass: "text-blue-700",
+      bgClass: "bg-blue-100",
+    },
+    delivered: {
+      label: "Delivered",
+      textClass: "text-emerald-700",
+      bgClass: "bg-emerald-100",
+    },
+    cancelled: {
+      label: "Cancelled",
+      textClass: "text-red-700",
+      bgClass: "bg-red-100",
+    },
   };
   const { label, textClass, bgClass } = STATUS_META[status];
   return (
-    <span className={`rounded-md px-2.5 py-0.5 text-xs font-semibold tracking-wide inline-block ${bgClass} ${textClass}`}>
+    <span
+      className={`rounded-md px-2.5 py-0.5 text-xs font-semibold tracking-wide inline-block ${bgClass} ${textClass}`}
+    >
       {label}
     </span>
   );
@@ -160,7 +200,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("skybot_token");
+    localStorage.removeItem("seth_token");
     setUser(null);
     window.location.href = "/";
   };
@@ -200,11 +240,12 @@ export default function Dashboard() {
   if (user.role !== "admin") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 font-sans">
-        <div className="text-4xl mb-3">🚫</div>
+        {/* <div className="text-4xl mb-3">🚫</div>
         <h2 className="text-gray-900 font-bold text-xl">Admins Only</h2>
         <p className="text-gray-500 mt-2 text-sm">
           Your account (<strong>{user.email}</strong>) does not have dashboard access.
-        </p>
+        </p> */}
+        <p>404:NotFound</p>
       </div>
     );
   }
@@ -216,13 +257,17 @@ export default function Dashboard() {
           <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center text-sm text-white">
             <MdOutlineDashboard />
           </div>
-          <span className="font-bold text-base text-gray-900 tracking-tight">Admin Dashboard</span>
+          <span className="font-bold text-base text-gray-900 tracking-tight">
+            Admin Dashboard
+          </span>
         </div>
         <div className="flex items-center gap-2.5">
           {/* <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-xs">
             {user.name.charAt(0).toUpperCase()}
           </div> */}
-          <span className="bg-green-300 py-2.5 px-2.5 rounded-md text-sm text-gray-700 font-medium">{user.name}</span>
+          <span className="bg-green-300 py-2.5 px-2.5 rounded-md text-sm text-gray-700 font-medium">
+            {user.name}
+          </span>
           {/* <span className="text-[11px] font-semibold bg-purple-50 text-purple-700 rounded-md px-2 py-0.5 tracking-wider uppercase">
             Admin
           </span> */}
@@ -237,12 +282,36 @@ export default function Dashboard() {
 
       <main className="p-8 max-w-7xl mx-auto">
         <div className="flex gap-4 flex-wrap mb-8">
-          <StatCard label="Total Orders" value={stats.total} borderTopClass="border-t-indigo-500" />
-          <StatCard label="Pending" value={stats.pending} borderTopClass="border-t-amber-500" />
-          <StatCard label="Confirmed" value={stats.confirmed} borderTopClass="border-t-blue-500" />
-          <StatCard label="Delivered" value={stats.delivered} borderTopClass="border-t-emerald-500" />
-          <StatCard label="Cancelled" value={stats.cancelled} borderTopClass="border-t-red-500" />
-          <StatCard label="Revenue (Non-Cancelled)" value={`$${stats.revenue.toFixed(2)}`} borderTopClass="border-t-purple-500" />
+          <StatCard
+            label="Total Orders"
+            value={stats.total}
+            borderTopClass="border-t-indigo-500"
+          />
+          <StatCard
+            label="Pending"
+            value={stats.pending}
+            borderTopClass="border-t-amber-500"
+          />
+          <StatCard
+            label="Confirmed"
+            value={stats.confirmed}
+            borderTopClass="border-t-blue-500"
+          />
+          <StatCard
+            label="Delivered"
+            value={stats.delivered}
+            borderTopClass="border-t-emerald-500"
+          />
+          <StatCard
+            label="Cancelled"
+            value={stats.cancelled}
+            borderTopClass="border-t-red-500"
+          />
+          <StatCard
+            label="Revenue (Non-Cancelled)"
+            value={`$${stats.revenue.toFixed(2)}`}
+            borderTopClass="border-t-purple-500"
+          />
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -265,7 +334,9 @@ export default function Dashboard() {
 
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as OrderStatus | "all")}
+                onChange={(e) =>
+                  setFilterStatus(e.target.value as OrderStatus | "all")
+                }
                 className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 bg-white cursor-pointer outline-none focus:border-indigo-500 transition-colors"
               >
                 <option value="all">All Statuses</option>
@@ -279,10 +350,13 @@ export default function Dashboard() {
                 onClick={loadOrders}
                 disabled={ordersLoading}
                 className={`bg-indigo-600 text-white border-none rounded-lg px-4 py-1.5 font-semibold text-sm flex items-center gap-1.5 transition-all ${
-                  ordersLoading ? "opacity-75 cursor-not-allowed" : "hover:bg-indigo-700 cursor-pointer"
+                  ordersLoading
+                    ? "opacity-75 cursor-not-allowed"
+                    : "hover:bg-indigo-700 cursor-pointer"
                 }`}
               >
-                {ordersLoading ? <Spinner size={14} color="text-white" /> : "↻"} Refresh
+                {ordersLoading ? <Spinner size={14} color="text-white" /> : "↻"}{" "}
+                Refresh
               </button>
               <button
                 onClick={() => window.history.back()}
@@ -293,7 +367,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {error && <div className="px-5 py-3 bg-red-50 border-b border-red-100 text-red-600 text-sm">{error}</div>}
+          {error && (
+            <div className="px-5 py-3 bg-red-50 border-b border-red-100 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="overflow-x-auto">
             {ordersLoading && orders.length === 0 ? (
@@ -302,13 +380,28 @@ export default function Dashboard() {
                 <p className="text-gray-400 mt-2 text-sm">Loading orders…</p>
               </div>
             ) : visible.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 text-sm">No orders match your filters.</div>
+              <div className="p-12 text-center text-gray-400 text-sm">
+                No orders match your filters.
+              </div>
             ) : (
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-gray-50">
-                    {["#", "Product", "Type", "Floor / Table", "Qty", "Total", "Status", "Placed", "Actions"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 whitespace-nowrap">
+                    {[
+                      "#",
+                      "Product",
+                      "Type",
+                      "Floor / Table",
+                      "Qty",
+                      "Total",
+                      "Status",
+                      "Placed",
+                      "Actions",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 whitespace-nowrap"
+                      >
                         {h}
                       </th>
                     ))}
@@ -316,12 +409,19 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {visible.map((order, i) => (
-                    <tr key={order.id} className={`transition-colors hover:bg-sky-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                    <tr
+                      key={order.id}
+                      className={`transition-colors hover:bg-sky-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
+                    >
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="font-semibold text-indigo-600">#{order.id}</span>
+                        <span className="font-semibold text-indigo-600">
+                          #{order.id}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle">
-                        <span className="font-medium text-gray-900">{order.product_name}</span>
+                        <span className="font-medium text-gray-900">
+                          {order.product_name}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
                         <span className="text-[11px] font-semibold bg-gray-100 text-gray-700 rounded-md px-2 py-0.5 capitalize">
@@ -329,20 +429,26 @@ export default function Dashboard() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="text-sm text-gray-600">{order.floor} — T{order.table_number}</span>
+                        <span className="text-sm text-gray-600">
+                          {order.floor} — T{order.table_number}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
                         <span className="font-medium">{order.quantity}</span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="font-semibold text-emerald-600">${Number(order.total_price).toFixed(2)}</span>
+                        <span className="font-semibold text-emerald-600">
+                          ${Number(order.total_price).toFixed(2)}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
                         <StatusBadge status={order.status} />
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-400 align-middle whitespace-nowrap">
                         {new Date(order.created_at).toLocaleDateString()}
-                        <span className="block text-[11px] text-gray-400 mt-0.5">{new Date(order.created_at).toLocaleTimeString()}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5">
+                          {new Date(order.created_at).toLocaleTimeString()}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
                         <button
@@ -351,17 +457,20 @@ export default function Dashboard() {
                         >
                           View
                         </button>
-                        {order.status !== "delivered" && order.status !== "cancelled" && (
-                          <button
-                            onClick={() => handleDelete(order.id)}
-                            disabled={deletingId === order.id}
-                            className={`border border-red-500 text-red-500 bg-transparent rounded-md px-3 py-1 font-semibold text-xs ml-1.5 transition-colors ${
-                              deletingId === order.id ? "opacity-50 cursor-not-allowed" : "hover:bg-red-50 cursor-pointer"
-                            }`}
-                          >
-                            {deletingId === order.id ? "…" : "Delete"}
-                          </button>
-                        )}
+                        {order.status !== "delivered" &&
+                          order.status !== "cancelled" && (
+                            <button
+                              onClick={() => handleDelete(order.id)}
+                              disabled={deletingId === order.id}
+                              className={`border border-red-500 text-red-500 bg-transparent rounded-md px-3 py-1 font-semibold text-xs ml-1.5 transition-colors ${
+                                deletingId === order.id
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : "hover:bg-red-50 cursor-pointer"
+                              }`}
+                            >
+                              {deletingId === order.id ? "…" : "Delete"}
+                            </button>
+                          )}
                       </td>
                     </tr>
                   ))}
@@ -373,7 +482,11 @@ export default function Dashboard() {
       </main>
 
       {selectedOrderId !== null && (
-        <OrderModal orderId={selectedOrderId} onClose={() => setSelectedOrderId(null)} onStatusChange={handleStatusChange} />
+        <OrderModal
+          orderId={selectedOrderId}
+          onClose={() => setSelectedOrderId(null)}
+          onStatusChange={handleStatusChange}
+        />
       )}
     </div>
   );

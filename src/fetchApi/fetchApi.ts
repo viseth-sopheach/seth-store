@@ -6,7 +6,7 @@ const baseHeaders = {
 };
 
 function getHeaders(isFormData = false) {
-  const token = localStorage.getItem("skybot_token");
+  const token = localStorage.getItem("seth_token");
   const headers: Record<string, string> = { ...baseHeaders };
 
   if (!isFormData) {
@@ -43,12 +43,12 @@ export async function loginUser(
   }
 
   const data = await response.json();
-  localStorage.setItem("skybot_token", data.token);
+  localStorage.setItem("seth_token", data.token);
   return data.user;
 }
 
 export function logoutUser(): void {
-  localStorage.removeItem("skybot_token");
+  localStorage.removeItem("seth_token");
 }
 
 export async function fetchAuthUser(): Promise<AuthUser> {

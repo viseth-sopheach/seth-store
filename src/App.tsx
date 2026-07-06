@@ -6,8 +6,7 @@ import DrProduct from "./pages/DrProduct";
 function App() {
   return (
     <Router>
-      {/* <Navbar /> */}
-
+      <Navbar />
       <Routes>
         <Route path="/" element={<DrProduct />} />
         <Route path="/dashboard" element={<Dashboard />} />

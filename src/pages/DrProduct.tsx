@@ -28,8 +28,7 @@ const glassInput =
 const glassBtn =
   "bg-white/30 backdrop-blur-md border border-white/50 hover:bg-white/50 transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)]";
 
-
-// ─── Badge 
+// ─── Badge
 
 function Badge({ stock }: { stock?: number }) {
   if (stock === undefined) return null;

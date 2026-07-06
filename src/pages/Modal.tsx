@@ -7,15 +7,13 @@ import {
 } from "../fetchApi/fetchApi";
 
 const glassInput =
-  "w-full bg-white/20 backdrop-blur-md border border-white/50 rounded-2xl px-4 py-2.5 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:border-white/70 focus:bg-white/30 transition-all duration-200 shadow-inner";
+  "w-full rounded-2xl border border-white/20 bg-white/18 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 focus:border-white/35 focus:bg-white/24 focus:shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_16px_40px_rgba(0,0,0,0.12)]";
 
 const glassBtn =
-  "bg-white/30 backdrop-blur-md border border-white/50 hover:bg-white/50 transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)]";
+  "rounded-2xl border border-white/20 bg-white/14 px-4 py-2.5 text-sm font-medium text-white/90 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_10px_25px_rgba(0,0,0,0.08)] transition-all duration-300 hover:bg-white/20 hover:border-white/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_16px_35px_rgba(0,0,0,0.12)] active:scale-[0.99]";
 
 const DRINK_TYPES = ["hot", "cold", "alcoholic", "non-alcoholic"] as const;
 type DrinkType = (typeof DRINK_TYPES)[number];
-
-// ─── Modal (Add/Edit) ─────────────────────────────────────────────────────────
 
 function Modal({
   initial,
@@ -73,7 +71,6 @@ function Modal({
     };
   }, []);
 
-  // FIX 1: Memoize options map to prevent recalculating on every keystroke
   const categoryOptions = useMemo(
     () =>
       categories.map((c) => (
@@ -99,7 +96,6 @@ function Modal({
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-  // FIX 2: Properly revoke Object URLs to prevent memory leaks/jank
   const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     setError(null);
@@ -108,7 +104,6 @@ function Modal({
     if (file) {
       const url = URL.createObjectURL(file);
       setImagePreview(url);
-      // Revoke previous preview if it was a blob (not a server URL)
       if (imagePreview && imagePreview.startsWith("blob:")) {
         URL.revokeObjectURL(imagePreview);
       }
@@ -156,76 +151,91 @@ function Modal({
   };
 
   return (
-    // FIX 3: Removed heavy backdrop-blur-2xl and bg-black/20 from overlay.
-    // Standard bg-black/40 is hardware-accelerated and won't lag.
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/40">
-      {/* FIX 4: Added will-change-transform to hint the browser to put this on the GPU */}
-      <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white/20 shadow-[0_30px_120px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/40 backdrop-blur-2xl border border-white/30 will-change-transform">
-        <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-white/40" />
-        </div>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/20">
-          <h2 className="text-white/90 font-semibold text-base drop-shadow-sm">
-            {initial ? "Edit Drink" : "New Drink"}
-          </h2>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-4 sm:items-center sm:p-6">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-400/30 blur-3xl" />
+        <div className="absolute right-[-5rem] top-24 h-80 w-80 rounded-full bg-fuchsia-500/25 blur-3xl" />
+        <div className="absolute bottom-[-6rem] left-1/3 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" />
+      </div>
+
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-[2.25rem] border border-white/20 bg-white/12 shadow-[0_30px_120px_rgba(0,0,0,0.35)] backdrop-blur-3xl ring-1 ring-inset ring-white/20">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.06)_35%,rgba(255,255,255,0.02)_70%,rgba(255,255,255,0.16))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.12),transparent_30%)]" />
+
+        <div className="relative flex items-center justify-between border-b border-white/15 px-6 py-4 sm:px-7">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
+              Drink details
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-white drop-shadow-sm">
+              {initial ? "Edit Drink" : "New Drink"}
+            </h2>
+          </div>
+
           <button
             onClick={onClose}
-            className={`${glassBtn} w-8 h-8 rounded-full flex items-center justify-center text-red-700 hover:text-white/90 hover:bg-white/15 text-xs transition-all duration-300`}
+            className="group flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/12 text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20 hover:text-white hover:shadow-[0_0_0_6px_rgba(255,255,255,0.05)]"
           >
-            ✕
+            <span className="text-base leading-none transition-transform duration-300 group-hover:rotate-90">
+              ✕
+            </span>
           </button>
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 rounded-2xl bg-red-500/15 border border-red-400/30 backdrop-blur-md px-4 py-3 text-sm text-red-200 shadow-[inset_0_0_20px_rgba(239,68,68,0.05)]">
+          <div className="relative mx-6 mt-4 rounded-2xl border border-red-300/20 bg-red-500/15 px-4 py-3 text-sm text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl sm:mx-7">
             {error}
           </div>
         )}
 
-        {/* FIX 5: Changed from max-h-[70vh] to max-h-[60vh] and added will-change-scroll-content */}
-        <div className="p-6 flex flex-col gap-4 max-h-[60vh] overflow-y-auto will-change-scroll-content scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-          <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-              Name <span className="text-red-300/80">*</span>
-            </label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handle}
-              className={glassInput}
-              placeholder="e.g. Mineral Water"
-            />
-          </div>
-          <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-              Brand
-            </label>
-            <input
-              name="brand"
-              value={form.brand}
-              onChange={handle}
-              className={glassInput}
-              placeholder="e.g. Evian, Coca-Cola…"
-            />
-          </div>
-          <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-              Type
-            </label>
-            <select
-              name="type"
-              value={form.type}
-              onChange={handle}
-              className={glassInput}
-            >
-              <option value="">— none —</option>
-              {drinkTypeOptions}
-            </select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="relative max-h-[60vh] space-y-4 overflow-y-auto p-6 sm:p-7">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+                Name <span className="text-red-200">*</span>
+              </label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handle}
+                className={glassInput}
+                placeholder="e.g. Mineral Water"
+              />
+            </div>
+
             <div>
-              <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-                Price <span className="text-red-300/80">*</span>
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+                Brand
+              </label>
+              <input
+                name="brand"
+                value={form.brand}
+                onChange={handle}
+                className={glassInput}
+                placeholder="e.g. Evian, Coca-Cola…"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+                Type
+              </label>
+              <select
+                name="type"
+                value={form.type}
+                onChange={handle}
+                className={glassInput}
+              >
+                <option value="">— none —</option>
+                {drinkTypeOptions}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+                Price <span className="text-red-200">*</span>
               </label>
               <input
                 name="price"
@@ -238,8 +248,9 @@ function Modal({
                 placeholder="0.00"
               />
             </div>
+
             <div>
-              <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
                 Stock
               </label>
               <input
@@ -253,9 +264,10 @@ function Modal({
               />
             </div>
           </div>
+
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-              Category <span className="text-red-300/80">*</span>
+            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+              Category <span className="text-red-200">*</span>
             </label>
             <select
               name="category_id"
@@ -271,24 +283,24 @@ function Modal({
               </option>
               {categoryOptions}
             </select>
+
             {initial?.category && (
-              <p className="text-[11px] text-white/40 mt-1 drop-shadow-sm">
+              <p className="mt-2 text-[11px] text-white/45">
                 Current:{" "}
-                <span className="text-blue-300/80">
-                  {initial.category.name}
-                </span>{" "}
+                <span className="text-cyan-200">{initial.category.name}</span>{" "}
                 (ID {initial.category.id})
               </p>
             )}
           </div>
+
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
               Image
             </label>
-            <div className="grid gap-3 sm:grid-cols-[120px_1fr] sm:items-center">
-              <div className="h-28 rounded-2xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_30px_rgba(255,255,255,0.05)]">
+
+            <div className="grid gap-4 sm:grid-cols-[132px_1fr] sm:items-start">
+              <div className="relative flex h-32 items-center justify-center overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_14px_35px_rgba(0,0,0,0.12)]">
                 {imagePreview ? (
-                  // FIX 6: Added loading="lazy" and decoding="async" to prevent image decode blocking the main thread
                   <img
                     src={imagePreview}
                     alt={form.name || "preview"}
@@ -297,43 +309,45 @@ function Modal({
                     decoding="async"
                   />
                 ) : (
-                  <span className="text-[11px] text-white/30 drop-shadow-sm">
-                    No image
-                  </span>
+                  <span className="text-[11px] text-white/35">No image</span>
                 )}
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),transparent_45%,rgba(255,255,255,0.06))]" />
               </div>
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp"
-                onChange={handleImage}
-                className="block w-full text-sm text-white/60 file:mr-4 file:rounded-xl file:border-0 file:bg-white/20 file:backdrop-blur-md file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white/90 file:border file:border-white/30 hover:file:bg-white/30 file:transition-all file:duration-300 file:cursor-pointer file:shadow-[0_2px_10px_rgba(255,255,255,0.1)]"
-              />
-              <p className="text-[11px] text-white/40 leading-relaxed drop-shadow-sm">
-                {imageFile
-                  ? `Selected: ${imageFile.name}`
-                  : currentImage
-                    ? "Current image stays unless you pick a new file."
-                    : "Choose an image for this drink."}
-              </p>
+
+              <div className="space-y-3">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  onChange={handleImage}
+                  className="block w-full text-sm text-white/70 file:mr-4 file:rounded-2xl file:border-0 file:bg-white/18 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white/90 file:backdrop-blur-xl file:transition-all file:duration-300 hover:file:bg-white/25"
+                />
+                <p className="text-[11px] leading-relaxed text-white/40">
+                  {imageFile
+                    ? `Selected: ${imageFile.name}`
+                    : currentImage
+                      ? "Current image stays unless you pick a new file."
+                      : "Choose an image for this drink."}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-3 px-6 py-5 border-t border-white/15 bg-white/5 backdrop-blur-sm">
+        <div className="relative flex gap-3 border-t border-white/15 bg-white/8 px-6 py-5 backdrop-blur-xl sm:px-7">
           <button
             onClick={onClose}
             disabled={saving}
-            className={`${glassBtn} flex-1 py-3 rounded-2xl text-red-700 text-sm font-medium disabled:opacity-50 hover:bg-white/15 hover:text-white/90 transition-all duration-300`}
+            className={`${glassBtn} flex-1 text-white/85 hover:text-white disabled:cursor-not-allowed disabled:opacity-50`}
           >
             Cancel
           </button>
           <button
             onClick={submit}
             disabled={saving}
-            className="flex-1 py-3 rounded-2xl bg-white/25 backdrop-blur-md hover:bg-white/35 text-blue-500 text-sm font-semibold border border-white/40 shadow-[0_4px_30px_rgba(255,255,255,0.15)] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-[0_4px_40px_rgba(255,255,255,0.2)] hover:scale-[1.01] active:scale-[0.99]"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-cyan-200/25 bg-gradient-to-r from-cyan-300/25 via-white/20 to-blue-400/25 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(59,130,246,0.18)] backdrop-blur-xl transition-all duration-300 hover:border-white/35 hover:from-cyan-300/30 hover:via-white/25 hover:to-blue-400/30 hover:shadow-[0_18px_45px_rgba(59,130,246,0.24)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving && (
-              <span className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
             )}
             {initial ? "Save Changes" : "Add Drink"}
           </button>
