@@ -24,11 +24,8 @@ export function BooksPage() {
     setBorrowingId(book.id);
     try {
       await api.post("/books_borrowed", { book_id: book.id });
-      setBooks((prev) =>
-        prev.map((b) => (b.id === book.id ? { ...b, stock: b.stock - 1 } : b)),
-      );
       setMessage(
-        `Borrowed "${book.title}". Check My Borrows for the due date.`,
+        `Borrow request for "${book.title}" was submitted. It'll appear on My Borrows once an admin approves it.`,
       );
     } catch (err) {
       setMessage(err.message);
@@ -66,7 +63,8 @@ export function BooksPage() {
           Books Catalog
         </h1>
         <p className="mt-2 text-sm text-black">
-          Explore and manage library items available for immediate checkout.
+          Explore available titles and request to borrow — an admin will
+          review and approve your request.
         </p>
       </div>
 

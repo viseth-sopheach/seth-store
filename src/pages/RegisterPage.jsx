@@ -64,7 +64,7 @@ export function RegisterPage() {
               Full Name
             </label>
             <input
-              placeholder="John Doe"
+              placeholder="Seth ..."
               value={form.name}
               onChange={update("name")}
               required

@@ -2,6 +2,42 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
+// Laravel date casts serialize as "YYYY-MM-DD" (or a full ISO string).
+// Render everything as dd/mm/yyyy per the required format.
+function formatDate(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+const STATUS_STYLES = {
+  pending:
+    "bg-amber-50 text-amber-800 border border-amber-200/60 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/30",
+  approved:
+    "bg-blue-50 text-blue-700 border border-blue-200/60 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/30",
+  returned:
+    "bg-emerald-50 text-emerald-800 border border-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30",
+  rejected:
+    "bg-red-50 text-red-700 border border-red-200/60 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/30",
+  cancelled:
+    "bg-slate-100 text-slate-700 border border-slate-200/60 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800",
+};
+
+function StatusBadge({ status }) {
+  const style = STATUS_STYLES[status] ?? STATUS_STYLES.cancelled;
+  return (
+    <span
+      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium capitalize tracking-wide ${style}`}
+    >
+      {status}
+    </span>
+  );
+}
+
 export function MyBorrowsPage() {
   const { isAdmin } = useAuth();
   const [borrows, setBorrows] = useState([]);
@@ -19,6 +55,34 @@ export function MyBorrowsPage() {
   }
 
   useEffect(load, []);
+
+  async function handleApprove(borrow) {
+    setBusyId(borrow.id);
+    try {
+      const updated = await api.patch(`/books_borrowed/${borrow.id}/approve`);
+      setBorrows((prev) =>
+        prev.map((b) => (b.id === borrow.id ? updated : b)),
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleReject(borrow) {
+    setBusyId(borrow.id);
+    try {
+      const updated = await api.patch(`/books_borrowed/${borrow.id}/reject`);
+      setBorrows((prev) =>
+        prev.map((b) => (b.id === borrow.id ? updated : b)),
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function handleReturn(borrow) {
     setBusyId(borrow.id);
@@ -66,6 +130,12 @@ export function MyBorrowsPage() {
         <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl">
           {isAdmin ? "All Borrows" : "My Borrows"}
         </h1>
+        {!isAdmin && (
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            Track your borrow requests and see due dates once they're
+            approved.
+          </p>
+        )}
       </div>
 
       {/* Error Message Box */}
@@ -95,15 +165,17 @@ export function MyBorrowsPage() {
                     Author
                   </th>
                   {isAdmin && (
-                    <th scope="col" className="px-6 py-3.5">
-                      Borrower
-                    </th>
+                    <>
+                      <th scope="col" className="px-6 py-3.5">
+                        Borrower
+                      </th>
+                      <th scope="col" className="px-6 py-3.5">
+                        Email
+                      </th>
+                    </>
                   )}
                   <th scope="col" className="px-6 py-3.5">
-                    Borrowed
-                  </th>
-                  <th scope="col" className="px-6 py-3.5">
-                    Due
+                    Due Date
                   </th>
                   <th scope="col" className="px-6 py-3.5">
                     Status
@@ -126,50 +198,66 @@ export function MyBorrowsPage() {
                       {b.author}
                     </td>
                     {isAdmin && (
-                      <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
-                        {b.user?.name || "Unknown"}
-                      </td>
+                      <>
+                        <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
+                          {b.user?.name || "Unknown"}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
+                          {b.user?.email || "—"}
+                        </td>
+                      </>
                     )}
                     <td className="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
-                      {b.borrowed_at}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
-                      {b.due_date}
+                      {formatDate(b.due_date)}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
-                      <span
-                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium uppercase tracking-wider ${
-                          b.status === "borrowed"
-                            ? "bg-amber-50 text-amber-800 border border-amber-200/60 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/30"
-                            : b.status === "returned"
-                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30"
-                              : "bg-slate-100 text-slate-700 border border-slate-200/60 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800"
-                        }`}
-                      >
-                        {b.status}
-                      </span>
+                      <StatusBadge status={b.status} />
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right">
-                      {b.status === "borrowed" && (
-                        <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-2">
+                        {isAdmin && b.status === "pending" && (
+                          <>
+                            <button
+                              type="button"
+                              disabled={busyId === b.id}
+                              onClick={() => handleApprove(b)}
+                              className="inline-flex h-8 items-center justify-center rounded-md bg-blue-600 px-3 text-xs font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:pointer-events-none disabled:opacity-50"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busyId === b.id}
+                              onClick={() => handleReject(b)}
+                              className="inline-flex h-8 items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:pointer-events-none disabled:opacity-50 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+
+                        {b.status === "approved" && (
                           <button
                             type="button"
                             disabled={busyId === b.id}
                             onClick={() => handleReturn(b)}
                             className="inline-flex h-8 items-center justify-center rounded-md bg-slate-900 px-3 text-xs font-medium text-white shadow-sm transition-colors hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
                           >
-                            Return
+                            Mark returned
                           </button>
-                          {/* <button
+                        )}
+
+                        {!isAdmin && b.status === "pending" && (
+                          <button
                             type="button"
                             disabled={busyId === b.id}
                             onClick={() => handleCancel(b)}
                             className="inline-flex h-8 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
                           >
                             Cancel
-                          </button> */}
-                        </div>
-                      )}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
