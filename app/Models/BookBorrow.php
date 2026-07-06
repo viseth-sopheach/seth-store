@@ -15,6 +15,8 @@ class BookBorrow extends Model
     'book_id',
     'title',
     'author',
+    'requested_at',
+    'approved_at',
     'borrowed_at',
     'due_date',
     'returned_at',
@@ -22,9 +24,11 @@ class BookBorrow extends Model
   ];
 
   protected $casts = [
-    'borrowed_at' => 'date',
-    'due_date'    => 'date',
-    'returned_at' => 'date',
+    'requested_at' => 'date',
+    'approved_at'  => 'date',
+    'borrowed_at'  => 'date',
+    'due_date'     => 'date',
+    'returned_at'  => 'date',
   ];
 
   public function user(): BelongsTo

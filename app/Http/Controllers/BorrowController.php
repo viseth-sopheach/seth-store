@@ -9,6 +9,11 @@ use Illuminate\Support\Carbon;
 
 class BorrowController extends Controller
 {
+  /**
+   * List borrow records.
+   * Admins see every request (all statuses, all users).
+   * Regular users only ever see their own requests — never another user's.
+   */
   public function index(Request $request)
   {
     $user = $request->user();
@@ -20,11 +25,14 @@ class BorrowController extends Controller
     return response()->json($borrows);
   }
 
+  /**
+   * Create a pending borrow request. Nothing is actually "borrowed" yet —
+   * an admin must approve it first.
+   */
   public function store(Request $request)
   {
     $validated = $request->validate([
-      'book_id'  => 'required|integer|exists:books,id',
-      'due_date' => 'nullable|date|after:today',
+      'book_id' => 'required|integer|exists:books,id',
     ]);
 
     $book = Book::findOrFail($validated['book_id']);
@@ -34,16 +42,13 @@ class BorrowController extends Controller
     }
 
     $borrow = BookBorrow::create([
-      'user_id'     => $request->user()->id,
-      'book_id'     => $book->id,
-      'title'       => $book->title,
-      'author'      => $book->author,
-      'borrowed_at' => Carbon::today(),
-      'due_date'    => $validated['due_date'] ?? Carbon::today()->addDays(14),
-      'status'      => 'borrowed',
+      'user_id'      => $request->user()->id,
+      'book_id'      => $book->id,
+      'title'        => $book->title,
+      'author'       => $book->author,
+      'requested_at' => Carbon::today(),
+      'status'       => 'pending',
     ]);
-
-    $book->decrement('stock');
 
     return response()->json($borrow->load('book'), 201);
   }
@@ -59,6 +64,50 @@ class BorrowController extends Controller
     return response()->json($bookBorrow->load(['user', 'book']));
   }
 
+  /**
+   * Admin-only: approve a pending request. This is the point at which the
+   * book is actually reserved (stock decremented) and the due date is set.
+   */
+  public function approve(Request $request, BookBorrow $bookBorrow)
+  {
+    if ($bookBorrow->status !== 'pending') {
+      return response()->json(['message' => 'Only pending requests can be approved.'], 422);
+    }
+
+    $book = $bookBorrow->book;
+
+    if (! $book || $book->stock < 1) {
+      return response()->json(['message' => 'This book is no longer in stock.'], 422);
+    }
+
+    $today = Carbon::today();
+
+    $bookBorrow->update([
+      'status'      => 'approved',
+      'approved_at' => $today,
+      'borrowed_at' => $today,
+      'due_date'    => $today->copy()->addDays(14),
+    ]);
+
+    $book->decrement('stock');
+
+    return response()->json($bookBorrow->load(['user', 'book']));
+  }
+
+  /**
+   * Admin-only: reject a pending request.
+   */
+  public function reject(Request $request, BookBorrow $bookBorrow)
+  {
+    if ($bookBorrow->status !== 'pending') {
+      return response()->json(['message' => 'Only pending requests can be rejected.'], 422);
+    }
+
+    $bookBorrow->update(['status' => 'rejected']);
+
+    return response()->json($bookBorrow->load(['user', 'book']));
+  }
+
   public function returnBook(Request $request, BookBorrow $bookBorrow)
   {
     $user = $request->user();
@@ -67,8 +116,8 @@ class BorrowController extends Controller
       return response()->json(['message' => 'Forbidden.'], 403);
     }
 
-    if ($bookBorrow->status === 'returned') {
-      return response()->json(['message' => 'This book has already been returned.'], 422);
+    if ($bookBorrow->status !== 'approved') {
+      return response()->json(['message' => 'Only approved borrows can be returned.'], 422);
     }
 
     $bookBorrow->update([
@@ -81,6 +130,10 @@ class BorrowController extends Controller
     return response()->json($bookBorrow->load('book'));
   }
 
+  /**
+   * Cancel a request. Users may cancel their own pending requests;
+   * admins may cancel any request that hasn't been returned yet.
+   */
   public function destroy(Request $request, BookBorrow $bookBorrow)
   {
     $user = $request->user();
@@ -89,7 +142,11 @@ class BorrowController extends Controller
       return response()->json(['message' => 'Forbidden.'], 403);
     }
 
-    if ($bookBorrow->status === 'borrowed') {
+    if (in_array($bookBorrow->status, ['returned', 'cancelled', 'rejected'])) {
+      return response()->json(['message' => 'This request can no longer be cancelled.'], 422);
+    }
+
+    if ($bookBorrow->status === 'approved') {
       $bookBorrow->book()->increment('stock');
     }
 

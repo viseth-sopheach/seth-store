@@ -50,6 +50,11 @@ Route::prefix('books_borrowed')->middleware('auth:sanctum')->controller(BorrowCo
   Route::get('/{bookBorrow}',  'show');
   Route::patch('/{bookBorrow}/return', 'returnBook');
   Route::delete('/{bookBorrow}', 'destroy');
+
+  Route::middleware('admin')->group(function () {
+    Route::patch('/{bookBorrow}/approve', 'approve');
+    Route::patch('/{bookBorrow}/reject',  'reject');
+  });
 });
 
 Route::prefix('drinks')->controller(DrinkController::class)->group(function () {
