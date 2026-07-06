@@ -13,7 +13,6 @@ return new class extends Migration
       $table->foreignId('category_id')->constrained()->cascadeOnDelete();
       $table->string('title');
       $table->string('author');
-      $table->string('genre');
       $table->decimal('price', 8, 2);
       $table->integer('stock')->default(0);
       $table->timestamps();

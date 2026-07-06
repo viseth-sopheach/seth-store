@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\DrinkController;
 use App\Http\Controllers\ComputerProductController;
 use App\Http\Controllers\ComputerShopOrderController;
@@ -36,11 +37,19 @@ Route::prefix('books')->controller(BookController::class)->group(function () {
   Route::get('/', 'index');
 
   Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::post('/',       'store');
-    Route::get('/{id}',    'show');
-    Route::put('/{id}',    'update');
-    Route::delete('/{id}', 'destroy');
+    Route::post('/',        'store');
+    Route::get('/{book}',   'show');
+    Route::put('/{book}',   'update');
+    Route::delete('/{book}', 'destroy');
   });
+});
+
+Route::prefix('books_borrowed')->middleware('auth:sanctum')->controller(BorrowController::class)->group(function () {
+  Route::get('/',              'index');
+  Route::post('/',             'store');
+  Route::get('/{bookBorrow}',  'show');
+  Route::patch('/{bookBorrow}/return', 'returnBook');
+  Route::delete('/{bookBorrow}', 'destroy');
 });
 
 Route::prefix('drinks')->controller(DrinkController::class)->group(function () {
