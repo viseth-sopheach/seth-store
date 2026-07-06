@@ -20,7 +20,7 @@ const BASE_URL = "http://127.0.0.1:8000/api/feedback";
 const FEEDBACK_CACHE_KEY = "feedback_cache";
 
 function getHeaders() {
-  const token = localStorage.getItem("skybot_token");
+  const token = localStorage.getItem("seth_token");
   return {
     "Content-Type": "application/json",
     Accept: "application/json",

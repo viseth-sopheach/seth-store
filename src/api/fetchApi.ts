@@ -6,7 +6,7 @@ const baseHeaders = {
 };
 
 function getHeaders() {
-  const token = localStorage.getItem('skybot_token');
+  const token = localStorage.getItem('seth_token');
 
   return token
     ? {
@@ -59,12 +59,12 @@ export async function loginUser(email: string, password: string): Promise<AuthUs
   }
 
   const data = await response.json();
-  localStorage.setItem('skybot_token', data.token);
+  localStorage.setItem('seth_token', data.token);
   return data.user;
 }
 
 export function logoutUser(): void {
-  localStorage.removeItem('skybot_token');
+  localStorage.removeItem('seth_token');
 }
 
 export async function fetchAuthUser(): Promise<AuthUser> {
@@ -169,7 +169,7 @@ export async function updateComputerProduct(
       method: "POST",
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${localStorage.getItem("skybot_token")}`,
+        Authorization: `Bearer ${localStorage.getItem("seth_token")}`,
       },
       body: formData,
     });
@@ -187,7 +187,7 @@ export async function updateComputerProduct(
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${localStorage.getItem("skybot_token")}`,
+      Authorization: `Bearer ${localStorage.getItem("seth_token")}`,
     },
     body: JSON.stringify(data),
   });
@@ -444,7 +444,7 @@ export async function registerUser(
   }
 
   const data = await response.json();
-  localStorage.setItem('skybot_token', data.token);
+  localStorage.setItem('seth_token', data.token);
   return data.user;
 }
 
@@ -462,7 +462,7 @@ export async function fetchUsers(): Promise<AppUser[]> {
   const res = await fetch(`${API_URL}/users`, {
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${localStorage.getItem("skybot_token")}`,
+      Authorization: `Bearer ${localStorage.getItem("seth_token")}`,
     },
   });
   if (!res.ok) throw new Error("Failed to fetch users");
@@ -476,7 +476,7 @@ export async function updateUserRole(id: number, role: string): Promise<AppUser>
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${localStorage.getItem("skybot_token")}`,
+      Authorization: `Bearer ${localStorage.getItem("seth_token")}`,
     },
     body: JSON.stringify({ role: role.toLowerCase() }),
   });
