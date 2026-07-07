@@ -11,8 +11,6 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::dropIfExists('book_borrows');
-
     Schema::create('book_borrows', function (Blueprint $table) {
       $table->id();
 
@@ -22,18 +20,14 @@ return new class extends Migration
       // Which book
       $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
 
-      // Snapshot at time of request
       $table->string('title');
       $table->string('author');
 
-      // Lifecycle timestamps
       $table->date('requested_at');
       $table->date('approved_at')->nullable();
       $table->date('borrowed_at')->nullable();
       $table->date('due_date')->nullable();
 
-      // dateTime (not date) so we can show the exact moment the user
-      // clicked "Return", not just the calendar day.
       $table->dateTime('returned_at')->nullable();
 
       $table->enum('status', ['pending', 'approved', 'rejected', 'returned', 'cancelled'])
