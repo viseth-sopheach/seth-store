@@ -9,7 +9,7 @@ export function Navbar() {
 
   async function handleLogout() {
     await logout();
-    navigate("/login");
+    navigate("/");
   }
 
   const initials = user?.name
@@ -45,7 +45,7 @@ export function Navbar() {
   );
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-[#E5DFD1] bg-[#FBF8F2]/95 backdrop-blur-sm">
+    <nav className=" sticky top-0 z-50 w-full border-b border-[#E5DFD1] bg-[#FBF8F2]/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Wordmark */}
         <div className="flex items-center gap-6">
@@ -104,7 +104,11 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <NavItem to="/login">Log in</NavItem>
+              <NavItem to="/login">
+                <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#E5DFD1] bg-white px-4 text-xs font-semibold text-[#211F1C] hover:bg-[#E5DFD1]">
+                  Log in
+                </button>
+              </NavItem>
             </>
           )}
         </div>

@@ -99,7 +99,7 @@ export function AdminBooksPage() {
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
       <div className="mb-8 border-b border-gray-200 pb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-[#4f4023] sm:text-3xl">
           Manage Books
         </h1>
       </div>
@@ -108,9 +108,7 @@ export function AdminBooksPage() {
       {error && (
         <div className="mb-6 rounded-lg bg-blue-50 p-4 border border-blue-200">
           <div className="flex">
-            <div className="text-sm font-medium text-blue-800">
-              {error}
-            </div>
+            <div className="text-sm font-medium text-blue-800">{error}</div>
           </div>
         </div>
       )}
@@ -173,13 +171,15 @@ export function AdminBooksPage() {
             className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
           />
 
-          <input
-            key={editingId ?? "new"}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors file:mr-3 file:h-full file:border-0 file:bg-transparent file:text-sm file:font-medium focus:border-blue-600 focus:bg-white focus:outline-none"
-          />
+          <label className="flex h-10 w-full cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm font-medium text-gray-700 hover:bg-gray-100">
+            Choose Image
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="hidden"
+            />
+          </label>
 
           <textarea
             placeholder="Description"

@@ -59,8 +59,8 @@ export function BooksPage() {
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
       <div className="mb-8 border-b border-slate-100 pb-5 dark:border-slate-900">
-        <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl">
-          Books Catalog
+        <h1 className="text-2xl font-bold tracking-tight text-[#4f4023] sm:text-3xl">
+          Let's read together!
         </h1>
         {/* <p className="mt-2 text-sm text-black">
           Explore available titles and request to borrow — an admin will
@@ -71,7 +71,7 @@ export function BooksPage() {
       {/* Status Messages */}
       {message && (
         <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-          {message}
+          The book you borrowed has been successfully requested. Please wait for an admin to approve your request.
         </div>
       )}
 

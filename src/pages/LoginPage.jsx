@@ -33,7 +33,7 @@ export function LoginPage() {
             Log in to your account
           </h1>
           <p className="mt-2 text-xs text-gray-500">
-            Welcome back! Please enter your details below.
+            Welcome back!
           </p>
         </div>
 
