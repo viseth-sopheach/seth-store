@@ -43,7 +43,7 @@ export function BookCard({ book, onBorrow, borrowing }) {
             </span>
           </div>
 
-          {onBorrow && (
+          {onBorrow ? (
             <button
               type="button"
               onClick={() => onBorrow(book)}
@@ -53,9 +53,13 @@ export function BookCard({ book, onBorrow, borrowing }) {
               {book.stock < 1
                 ? "Out of stock"
                 : borrowing
-                ? "Requesting…"
-                : "Borrow"}
+                  ? "Requesting…"
+                  : "Borrow"}
             </button>
+          ) : (
+            <span className="text-[11px] font-medium italic text-gray-400">
+              Login to borrow a book
+            </span>
           )}
         </div>
       </div>

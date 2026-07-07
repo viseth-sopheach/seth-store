@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
     try {
       await api.post('/logout')
     } catch {
-      // token may already be invalid — clear locally regardless
+      
     }
     localStorage.removeItem('token')
     setUser(null)
