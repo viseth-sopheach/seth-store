@@ -86,7 +86,7 @@ class BorrowController extends Controller
       'status'      => 'approved',
       'approved_at' => $today->toDateString(),
       'borrowed_at' => $today->toDateString(),
-      'due_date'    => $today->copy()->addDays(14)->toDateString(),
+      'due_date'    => $today->copy()->addDays(0)->toDateString(),
     ]);
 
     $book->decrement('stock');
