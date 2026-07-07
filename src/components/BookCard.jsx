@@ -5,9 +5,9 @@ export function BookCard({ book, onBorrow, borrowing }) {
   const [showDescription, setShowDescription] = useState(false);
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       {book.image_url && (
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
           <img
             src={book.image_url}
             alt={book.title}
@@ -17,28 +17,28 @@ export function BookCard({ book, onBorrow, borrowing }) {
       )}
 
       <div className="flex flex-1 flex-col pt-3">
-        <h3 className="line-clamp-1 font-semibold text-slate-900 dark:text-slate-50 text-base tracking-tight">
+        <h3 className="line-clamp-1 text-base font-semibold tracking-tight text-gray-900">
           {book.title}
         </h3>
 
-        <p className="mt-1 line-clamp-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-          {book.author}{" "}
+        <p className="mt-1 line-clamp-1 text-xs font-medium text-gray-500">
+          {book.author}
         </p>
 
         <button
           type="button"
           onClick={() => setShowDescription(true)}
-          className="mt-1.5 self-start text-xs font-semibold text-blue-600 transition-colors hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+          className="mt-1.5 self-start text-xs font-semibold text-gray-600 transition hover:text-black hover:underline"
         >
           See description
         </button>
 
-        <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-900">
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-gray-200 pt-3">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-50">
+            <span className="text-sm font-bold text-black">
               ${Number(book.price).toFixed(2)}
             </span>
-            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+            <span className="text-[11px] font-medium text-gray-500">
               {book.stock} left
             </span>
           </div>
@@ -48,13 +48,13 @@ export function BookCard({ book, onBorrow, borrowing }) {
               type="button"
               onClick={() => onBorrow(book)}
               disabled={book.stock < 1 || borrowing}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-3.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:pointer-events-none disabled:bg-slate-100 disabled:text-slate-400 dark:disabled:bg-slate-900 dark:disabled:text-slate-600"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-500 px-3.5 text-xs font-semibold text-white shadow-sm transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
             >
               {book.stock < 1
                 ? "Out of stock"
                 : borrowing
-                  ? "Requesting…"
-                  : "Borrow"}
+                ? "Requesting…"
+                : "Borrow"}
             </button>
           )}
         </div>

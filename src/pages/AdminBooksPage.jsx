@@ -98,17 +98,17 @@ export function AdminBooksPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
-      <div className="mb-8 border-b border-slate-200 pb-5 dark:border-slate-800">
-        <h1 className="text-2xl font-bold tracking-tight text-black  sm:text-3xl">
+      <div className="mb-8 border-b border-gray-200 pb-5">
+        <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl">
           Manage Books
         </h1>
       </div>
 
       {/* Error Alert Box */}
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 p-4 border border-red-200 dark:bg-red-950/30 dark:border-red-900/50">
+        <div className="mb-6 rounded-lg bg-blue-50 p-4 border border-blue-200">
           <div className="flex">
-            <div className="text-sm font-medium text-red-800 dark:text-red-400">
+            <div className="text-sm font-medium text-blue-800">
               {error}
             </div>
           </div>
@@ -116,8 +116,8 @@ export function AdminBooksPage() {
       )}
 
       {/* Dynamic Form Card */}
-      <div className="mb-10 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+      <div className="mb-10 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
           {editingId ? "Modify Selected Item" : "Register New Inventory Item"}
         </h2>
 
@@ -129,7 +129,7 @@ export function AdminBooksPage() {
             value={form.category_id}
             onChange={update("category_id")}
             required
-            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+            className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors focus:border-blue-600 focus:bg-white focus:outline-none"
           >
             <option value="">Category</option>
             {categories.map((c) => (
@@ -144,7 +144,7 @@ export function AdminBooksPage() {
             value={form.title}
             onChange={update("title")}
             required
-            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+            className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
           />
 
           <input
@@ -152,7 +152,7 @@ export function AdminBooksPage() {
             value={form.author}
             onChange={update("author")}
             required
-            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+            className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
           />
 
           <input
@@ -162,7 +162,7 @@ export function AdminBooksPage() {
             value={form.price}
             onChange={update("price")}
             required
-            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+            className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
           />
 
           <input
@@ -170,7 +170,7 @@ export function AdminBooksPage() {
             placeholder="Stock"
             value={form.stock}
             onChange={update("stock")}
-            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+            className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
           />
 
           <input
@@ -178,7 +178,7 @@ export function AdminBooksPage() {
             type="file"
             accept="image/png,image/jpeg,image/webp"
             onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors file:mr-3 file:h-full file:border-0 file:bg-transparent file:text-sm file:font-medium focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+            className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors file:mr-3 file:h-full file:border-0 file:bg-transparent file:text-sm file:font-medium focus:border-blue-600 focus:bg-white focus:outline-none"
           />
 
           <textarea
@@ -186,14 +186,14 @@ export function AdminBooksPage() {
             value={form.description}
             onChange={update("description")}
             rows={2}
-            className="col-span-1 block w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950 sm:col-span-2 md:col-span-3 lg:col-span-6"
+            className="col-span-1 block w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none sm:col-span-2 md:col-span-3 lg:col-span-6"
           />
 
           <div className="col-span-1 flex flex-wrap items-center gap-3 pt-2 sm:col-span-2 md:col-span-3 lg:col-span-6">
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white shadow-sm transition-all hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200 dark:focus-visible:outline-slate-50"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white shadow-sm transition-all hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:pointer-events-none disabled:opacity-50"
             >
               {editingId ? "Update book" : "Add book"}
             </button>
@@ -202,7 +202,7 @@ export function AdminBooksPage() {
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-xs font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 Cancel
               </button>
@@ -212,10 +212,10 @@ export function AdminBooksPage() {
       </div>
 
       {/* Data Management Table Component */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
               <tr>
                 <th scope="col" className="px-6 py-3.5">
                   Title
@@ -237,25 +237,25 @@ export function AdminBooksPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
+            <tbody className="divide-y divide-gray-100">
               {books.map((book) => (
                 <tr
                   key={book.id}
-                  className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/20"
+                  className="transition-colors hover:bg-gray-50"
                 >
-                  <td className="whitespace-nowrap px-6 py-4 font-semibold text-slate-900 dark:text-slate-50">
+                  <td className="whitespace-nowrap px-6 py-4 font-semibold text-gray-900">
                     {book.title}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400">
+                  <td className="whitespace-nowrap px-6 py-4 text-gray-600">
                     {book.author}
                   </td>
-                  <td className="max-w-xs truncate px-6 py-4 text-slate-600 dark:text-slate-400">
+                  <td className="max-w-xs truncate px-6 py-4 text-gray-600">
                     {book.description || "—"}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-900 dark:text-slate-50">
+                  <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-900">
                     ${Number(book.price).toFixed(2)}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400">
+                  <td className="whitespace-nowrap px-6 py-4 text-gray-600">
                     {book.stock}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right">
@@ -263,14 +263,14 @@ export function AdminBooksPage() {
                       <button
                         type="button"
                         onClick={() => startEdit(book)}
-                        className="inline-flex h-8 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                        className="inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-black"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(book)}
-                        className="inline-flex h-8 items-center justify-center rounded-md border border-transparent bg-red-50 px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                        className="inline-flex h-8 items-center justify-center rounded-md border border-transparent bg-blue-50 px-3 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
                       >
                         Delete
                       </button>

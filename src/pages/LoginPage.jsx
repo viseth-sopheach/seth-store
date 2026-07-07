@@ -38,11 +38,11 @@ export function LoginPage() {
         </div>
 
         {/* Error Alert Box */}
-        {error && (
+        {/* {error && (
           <div className="mb-4 rounded-lg bg-red-50 p-3 border border-red-200 text-xs font-medium text-red-800 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400">
             {error}
           </div>
-        )}
+        )} */}
 
         {/* Form Elements */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

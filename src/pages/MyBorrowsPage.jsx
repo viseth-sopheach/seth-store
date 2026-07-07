@@ -16,15 +16,15 @@ function formatDate(value) {
 
 const STATUS_STYLES = {
   pending:
-    "bg-amber-50 text-amber-800 border border-amber-200/60 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/30",
+    "bg-gray-100 text-gray-700 border border-gray-200",
   approved:
-    "bg-blue-50 text-blue-700 border border-blue-200/60 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/30",
+    "bg-black text-white border border-black",
   returned:
-    "bg-emerald-50 text-emerald-800 border border-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30",
+    "bg-gray-800 text-white border border-gray-800",
   rejected:
-    "bg-red-50 text-red-700 border border-red-200/60 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/30",
+    "bg-gray-300 text-gray-900 border border-gray-400",
   cancelled:
-    "bg-slate-100 text-slate-700 border border-slate-200/60 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800",
+    "bg-gray-100 text-gray-500 border border-gray-200",
 };
 
 function StatusBadge({ status }) {
@@ -115,8 +115,8 @@ export function MyBorrowsPage() {
   if (loading) {
     return (
       <div className="flex min-h-[50vh] w-full flex-col items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-slate-800 dark:border-slate-800 dark:border-t-slate-200" />
-        <p className="mt-3 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-black" />
+        <p className="mt-3 text-xs font-semibold tracking-wide uppercase text-gray-500">
           Loading borrows…
         </p>
       </div>
@@ -126,12 +126,12 @@ export function MyBorrowsPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
-      <div className="mb-8 border-b border-slate-200 pb-5 dark:border-slate-800">
+      <div className="mb-8 border-b border-gray-200 pb-5">
         <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl">
           {isAdmin ? "All Borrows" : "My Borrows"}
         </h1>
         {!isAdmin && (
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-sm text-gray-500">
             Track your borrow requests and see due dates once they're
             approved.
           </p>
@@ -140,23 +140,23 @@ export function MyBorrowsPage() {
 
       {/* Error Message Box */}
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 p-4 border border-red-200 text-sm font-medium text-red-800 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400">
+        <div className="mb-6 rounded-lg border border-gray-300 bg-gray-100 p-4 text-sm font-medium text-gray-800">
           {error}
         </div>
       )}
 
       {/* Empty State vs Log Table Container */}
       {borrows.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-12 text-center dark:border-slate-800">
-          <p className="text-sm font-medium text-slate-400 dark:text-slate-500">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 py-12 text-center">
+          <p className="text-sm font-medium text-gray-500">
             No borrow records yet.
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+              <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 <tr>
                   <th scope="col" className="px-6 py-3.5">
                     Title
@@ -185,29 +185,29 @@ export function MyBorrowsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
+              <tbody className="divide-y divide-gray-100">
                 {borrows.map((b) => (
                   <tr
                     key={b.id}
-                    className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/20"
+                    className="transition-colors hover:bg-gray-50"
                   >
-                    <td className="whitespace-nowrap px-6 py-4 font-semibold text-slate-900 dark:text-slate-50">
+                    <td className="whitespace-nowrap px-6 py-4 font-semibold text-black">
                       {b.title}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400">
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-600">
                       {b.author}
                     </td>
                     {isAdmin && (
                       <>
-                        <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
+                        <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-700">
                           {b.user?.name || "Unknown"}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
+                        <td className="whitespace-nowrap px-6 py-4 text-gray-500">
                           {b.user?.email || "—"}
                         </td>
                       </>
                     )}
-                    <td className="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500">
                       {formatDate(b.due_date)}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
@@ -221,7 +221,7 @@ export function MyBorrowsPage() {
                               type="button"
                               disabled={busyId === b.id}
                               onClick={() => handleApprove(b)}
-                              className="inline-flex h-8 items-center justify-center rounded-md bg-blue-600 px-3 text-xs font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:pointer-events-none disabled:opacity-50"
+                              className="inline-flex h-8 items-center justify-center rounded-md bg-black px-3 text-xs font-medium text-white shadow-sm transition-colors hover:bg-gray-800 disabled:pointer-events-none disabled:opacity-50"
                             >
                               Approve
                             </button>
@@ -229,7 +229,7 @@ export function MyBorrowsPage() {
                               type="button"
                               disabled={busyId === b.id}
                               onClick={() => handleReject(b)}
-                              className="inline-flex h-8 items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:pointer-events-none disabled:opacity-50 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                              className="inline-flex h-8 items-center justify-center rounded-md border border-gray-300 bg-white px-3 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
                             >
                               Reject
                             </button>
@@ -241,7 +241,7 @@ export function MyBorrowsPage() {
                             type="button"
                             disabled={busyId === b.id}
                             onClick={() => handleReturn(b)}
-                            className="inline-flex h-8 items-center justify-center rounded-md bg-slate-900 px-3 text-xs font-medium text-white shadow-sm transition-colors hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+                            className="inline-flex h-8 items-center justify-center rounded-md bg-black px-3 text-xs font-medium text-white shadow-sm transition-colors hover:bg-gray-800 disabled:pointer-events-none disabled:opacity-50"
                           >
                             Mark returned
                           </button>
@@ -252,7 +252,7 @@ export function MyBorrowsPage() {
                             type="button"
                             disabled={busyId === b.id}
                             onClick={() => handleCancel(b)}
-                            className="inline-flex h-8 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                            className="inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-black disabled:pointer-events-none disabled:opacity-50"
                           >
                             Cancel
                           </button>

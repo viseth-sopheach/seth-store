@@ -62,10 +62,10 @@ export function BooksPage() {
         <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl">
           Books Catalog
         </h1>
-        <p className="mt-2 text-sm text-black">
+        {/* <p className="mt-2 text-sm text-black">
           Explore available titles and request to borrow — an admin will
           review and approve your request.
-        </p>
+        </p> */}
       </div>
 
       {/* Status Messages */}
