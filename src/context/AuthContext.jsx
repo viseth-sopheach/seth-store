@@ -1,45 +1,59 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { api } from '../api/client'
+import { createContext, useContext, useEffect, useState } from "react";
+import { api } from "../api/client";
 
-const AuthContext = createContext(null)
+const AuthContext = createContext(null);
+
+function clearUserScopedCaches() {
+  try {
+    sessionStorage.removeItem("borrows_cache");
+  } catch {
+    // sessionStorage unavailable — nothing to clear
+  }
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem("token");
     if (!token) {
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
     api
-      .get('/user')
+      .get("/user")
       .then(setUser)
-      .catch(() => localStorage.removeItem('token'))
-      .finally(() => setLoading(false))
-  }, [])
+      .catch(() => localStorage.removeItem("token"))
+      .finally(() => setLoading(false));
+  }, []);
 
   async function login(email, password) {
-    const data = await api.post('/login', { email, password })
-    localStorage.setItem('token', data.token)
-    setUser(data.user)
+    const data = await api.post("/login", { email, password });
+    clearUserScopedCaches();
+    localStorage.setItem("token", data.token);
+    setUser(data.user);
   }
 
   async function register(name, email, password, password_confirmation) {
-    const data = await api.post('/register', { name, email, password, password_confirmation })
-    localStorage.setItem('token', data.token)
-    setUser(data.user)
+    const data = await api.post("/register", {
+      name,
+      email,
+      password,
+      password_confirmation,
+    });
+    clearUserScopedCaches();
+    localStorage.setItem("token", data.token);
+    setUser(data.user);
   }
 
   async function logout() {
     try {
-      await api.post('/logout')
-    } catch {
-      
-    }
-    localStorage.removeItem('token')
-    setUser(null)
+      await api.post("/logout");
+    } catch {}
+    clearUserScopedCaches();
+    localStorage.removeItem("token");
+    setUser(null);
   }
 
   const value = {
@@ -48,14 +62,14 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
-    isAdmin: user?.role === 'admin',
-  }
+    isAdmin: user?.role === "admin",
+  };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within an AuthProvider')
-  return ctx
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
+  return ctx;
 }

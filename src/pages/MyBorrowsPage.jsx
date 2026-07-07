@@ -4,14 +4,20 @@ import { useAuth } from "../context/AuthContext";
 
 const CACHE_KEY = "borrows_cache";
 
-function formatDate(value) {
-  if (!value) return "—";
+function formatDate(value, withTime = false) {
+  if (!value) return "-";
   const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "-";
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  const datePart = `${day}/${month}/${year}`;
+
+  if (!withTime) return datePart;
+
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${datePart} ${hours}:${minutes}`;
 }
 
 const STATUS_STYLES = {
@@ -56,10 +62,12 @@ export function MyBorrowsPage() {
   const [loading, setLoading] = useState(() => readCache() === null);
   const [error, setError] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  // Admin-only: lets the admin pick a return date per pending row before approving.
+  const [returnDates, setReturnDates] = useState({});
 
   function fetchBorrows() {
     setLoading(true);
-    api
+    return api
       .get("/books_borrowed")
       .then((data) => {
         setBorrows(data);
@@ -89,10 +97,17 @@ export function MyBorrowsPage() {
   async function handleApprove(borrow) {
     setBusyId(borrow.id);
     try {
-      const updated = await api.patch(`/books_borrowed/${borrow.id}/approve`);
+      const updated = await api.patch(`/books_borrowed/${borrow.id}/approve`, {
+        return_date: returnDates[borrow.id] || undefined,
+      });
       applyUpdate((prev) =>
         prev.map((b) => (b.id === borrow.id ? updated : b)),
       );
+      setReturnDates((prev) => {
+        const next = { ...prev };
+        delete next[borrow.id];
+        return next;
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -208,10 +223,10 @@ export function MyBorrowsPage() {
                     </>
                   )}
                   <th scope="col" className="px-6 py-3.5">
-                    Due Date
+                    Borrowed Date
                   </th>
                   <th scope="col" className="px-6 py-3.5">
-                    Return date
+                    Return Date
                   </th>
                   <th scope="col" className="px-6 py-3.5">
                     Status
@@ -241,16 +256,20 @@ export function MyBorrowsPage() {
                       </>
                     )}
                     <td className="whitespace-nowrap px-6 py-4 text-gray-500">
-                      {formatDate(b.due_date)}
+                      {b.borrowed_at ? formatDate(b.borrowed_at) : "-"}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-gray-500">
-                      returned: {formatDate(b.return_date)}
+                      {b.status === "returned" && b.returned_at
+                        ? formatDate(b.returned_at, true)
+                        : b.due_date
+                          ? formatDate(b.due_date)
+                          : "-"}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <StatusBadge status={b.status} />
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2">
                         {isAdmin && b.status === "pending" && (
                           <>
                             <button
