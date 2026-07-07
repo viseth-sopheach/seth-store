@@ -39,20 +39,20 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
         {/* Header Block */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+          <h1 className="text-2xl font-bold tracking-tight text-black">
             Create an account
           </h1>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-xs text-gray-500">
             Join us to explore and borrow books from the library.
           </p>
         </div>
 
         {/* Error Alert Box */}
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 p-3 border border-red-200 text-xs font-medium text-red-800 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400">
+          <div className="mb-4 rounded-lg bg-blue-50 p-3 border border-blue-200 text-xs font-medium text-blue-800">
             {error}
           </div>
         )}
@@ -60,7 +60,7 @@ export function RegisterPage() {
         {/* Form Elements */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
               Full Name
             </label>
             <input
@@ -68,12 +68,12 @@ export function RegisterPage() {
               value={form.name}
               onChange={update("name")}
               required
-              className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+              className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
               Email Address
             </label>
             <input
@@ -82,12 +82,12 @@ export function RegisterPage() {
               value={form.email}
               onChange={update("email")}
               required
-              className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+              className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
               Password
             </label>
             <input
@@ -96,12 +96,12 @@ export function RegisterPage() {
               value={form.password}
               onChange={update("password")}
               required
-              className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+              className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
               Confirm Password
             </label>
             <input
@@ -110,25 +110,25 @@ export function RegisterPage() {
               value={form.password_confirmation}
               onChange={update("password_confirmation")}
               required
-              className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-slate-50 dark:focus:bg-slate-950"
+              className="block h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 shadow-sm transition-colors placeholder:text-gray-400 focus:border-blue-600 focus:bg-white focus:outline-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="mt-2 inline-flex h-10 items-center justify-center rounded-lg bg-slate-900 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200 dark:focus-visible:outline-slate-50"
+            className="mt-2 inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:pointer-events-none disabled:opacity-50"
           >
             {submitting ? "Creating…" : "Create account"}
           </button>
         </form>
 
         {/* Footer Link */}
-        <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-6 text-center text-sm text-gray-500">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-semibold text-slate-900 underline underline-offset-4 transition-colors hover:text-slate-700 dark:text-slate-50 dark:hover:text-slate-300"
+            className="font-semibold text-blue-600 underline underline-offset-4 transition-colors hover:text-blue-700"
           >
             Log in
           </Link>
