@@ -46,7 +46,7 @@ class BorrowController extends Controller
       'book_id'      => $book->id,
       'title'        => $book->title,
       'author'       => $book->author,
-      'requested_at' => Carbon::today(),
+      'requested_at' => Carbon::now('Asia/Phnom_Penh')->toDateString(),
       'status'       => 'pending',
     ]);
 
@@ -80,13 +80,13 @@ class BorrowController extends Controller
       return response()->json(['message' => 'This book is no longer in stock.'], 422);
     }
 
-    $today = Carbon::today();
+    $today = Carbon::now('Asia/Phnom_Penh')->startOfDay();
 
     $bookBorrow->update([
       'status'      => 'approved',
-      'approved_at' => $today,
-      'borrowed_at' => $today,
-      'due_date'    => $today->copy()->addDays(14),
+      'approved_at' => $today->toDateString(),
+      'borrowed_at' => $today->toDateString(),
+      'due_date'    => $today->copy()->addDays(14)->toDateString(),
     ]);
 
     $book->decrement('stock');
@@ -122,7 +122,7 @@ class BorrowController extends Controller
 
     $bookBorrow->update([
       'status'      => 'returned',
-      'returned_at' => Carbon::today(),
+      'returned_at' => Carbon::now('Asia/Phnom_Penh')->toDateString(),
     ]);
 
     $bookBorrow->book()->increment('stock');
