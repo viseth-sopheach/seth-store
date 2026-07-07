@@ -80,13 +80,17 @@ class BorrowController extends Controller
       return response()->json(['message' => 'This book is no longer in stock.'], 422);
     }
 
+    $validated = $request->validate([
+      'return_date' => ['nullable', 'date', 'after_or_equal:today'],
+    ]);
+
     $today = Carbon::now('Asia/Phnom_Penh')->startOfDay();
 
     $bookBorrow->update([
       'status'      => 'approved',
       'approved_at' => $today->toDateString(),
       'borrowed_at' => $today->toDateString(),
-      'due_date'    => $today->copy()->addDays(0)->toDateString(),
+      'due_date'    => $validated['return_date'] ?? $today->copy()->addDays(14)->toDateString(),
     ]);
 
     $book->decrement('stock');

@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+  /**
+   * Run the migrations.
+   */
   public function up(): void
   {
     Schema::dropIfExists('book_borrows');
@@ -28,7 +31,10 @@ return new class extends Migration
       $table->date('approved_at')->nullable();
       $table->date('borrowed_at')->nullable();
       $table->date('due_date')->nullable();
-      $table->date('returned_at')->nullable();
+
+      // dateTime (not date) so we can show the exact moment the user
+      // clicked "Return", not just the calendar day.
+      $table->dateTime('returned_at')->nullable();
 
       $table->enum('status', ['pending', 'approved', 'rejected', 'returned', 'cancelled'])
         ->default('pending');
@@ -43,19 +49,5 @@ return new class extends Migration
   public function down(): void
   {
     Schema::dropIfExists('book_borrows');
-
-    Schema::create('book_borrows', function (Blueprint $table) {
-      $table->id();
-      $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-      $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
-      $table->string('title');
-      $table->string('author');
-      $table->date('borrowed_at');
-      $table->date('due_date');
-      $table->date('returned_at')->nullable();
-      $table->enum('status', ['borrowed', 'returned', 'overdue', 'cancelled'])
-        ->default('borrowed');
-      $table->timestamps();
-    });
   }
 };

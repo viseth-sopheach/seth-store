@@ -28,8 +28,15 @@ class BookBorrow extends Model
     'approved_at'  => 'date',
     'borrowed_at'  => 'date',
     'due_date'     => 'date',
-    'returned_at'  => 'date',
+    'returned_at'  => 'datetime',
   ];
+
+  protected $appends = ['return_date'];
+
+  public function getReturnDateAttribute(): ?string
+  {
+    return $this->due_date?->format('d-m-Y');
+  }
 
   public function user(): BelongsTo
   {
