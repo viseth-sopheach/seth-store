@@ -32,6 +32,7 @@ class ComputerProductController extends Controller
     ]);
 
     if ($request->hasFile('image')) {
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('computers', 'public');
     }
 
@@ -69,6 +70,7 @@ class ComputerProductController extends Controller
       if ($computerProduct->image) {
         \Illuminate\Support\Facades\Storage::disk('public')->delete($computerProduct->image);
       }
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('computers', 'public');
     }
 

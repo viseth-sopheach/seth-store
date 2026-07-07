@@ -31,6 +31,7 @@ class DrinkController extends Controller
     ]);
 
     if ($request->hasFile('image')) {
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('drinks', 'public');
     }
 
@@ -65,6 +66,7 @@ class DrinkController extends Controller
       if ($drink->image && !filter_var($drink->image, FILTER_VALIDATE_URL)) {
         Storage::disk('public')->delete($drink->image);
       }
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('drinks', 'public');
     }
 

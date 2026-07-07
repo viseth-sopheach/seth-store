@@ -31,6 +31,7 @@ class BookController extends Controller
     ]);
 
     if ($request->hasFile('image')) {
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('books', 'public');
     }
 
@@ -64,6 +65,7 @@ class BookController extends Controller
       if ($book->image) {
         Storage::disk('public')->delete($book->image);
       }
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('books', 'public');
     }
 

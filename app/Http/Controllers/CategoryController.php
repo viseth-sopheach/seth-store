@@ -33,6 +33,7 @@ class CategoryController extends Controller
     ]);
 
     if ($request->hasFile('image')) {
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('categories', 'public');
     }
 
@@ -64,6 +65,7 @@ class CategoryController extends Controller
       if ($category->image) {
         Storage::disk('public')->delete($category->image);
       }
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('categories', 'public');
     }
 

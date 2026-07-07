@@ -32,6 +32,7 @@ class PhoneProductController extends Controller
     ]);
 
     if ($request->hasFile('image')) {
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('phones', 'public');
     }
 
@@ -67,6 +68,7 @@ class PhoneProductController extends Controller
       if ($phoneProduct->image) {
         Storage::disk('public')->delete($phoneProduct->image);
       }
+      // TODO: Render's free filesystem is ephemeral; move uploads to Cloudinary or S3 before relying on persisted images.
       $validated['image'] = $request->file('image')->store('phones', 'public');
     }
 
