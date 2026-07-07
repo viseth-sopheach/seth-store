@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 
+const BOOKS_CACHE_KEY = "admin_books_cache";
+const CATEGORIES_CACHE_KEY = "admin_categories_cache";
+
 const emptyForm = {
   category_id: "",
   title: "",
@@ -10,27 +13,58 @@ const emptyForm = {
   description: "",
 };
 
+function readCache(key) {
+  try {
+    const cached = sessionStorage.getItem(key);
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(key, data) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // ignore storage write failures
+  }
+}
+
 export function AdminBooksPage() {
-  const [books, setBooks] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [books, setBooks] = useState(() => readCache(BOOKS_CACHE_KEY) ?? []);
+  const [categories, setCategories] = useState(
+    () => readCache(CATEGORIES_CACHE_KEY) ?? [],
+  );
   const [form, setForm] = useState(emptyForm);
   const [imageFile, setImageFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  function load() {
-    api
+  function fetchBooks() {
+    return api
       .get("/books")
-      .then(setBooks)
+      .then((data) => {
+        setBooks(data);
+        writeCache(BOOKS_CACHE_KEY, data);
+      })
       .catch((err) => setError(err.message));
-    api
+  }
+
+  function fetchCategories() {
+    return api
       .get("/categories")
-      .then(setCategories)
+      .then((data) => {
+        setCategories(data);
+        writeCache(CATEGORIES_CACHE_KEY, data);
+      })
       .catch(() => {});
   }
 
-  useEffect(load, []);
+  useEffect(() => {
+    if (readCache(BOOKS_CACHE_KEY) === null) fetchBooks();
+    if (readCache(CATEGORIES_CACHE_KEY) === null) fetchCategories();
+  }, []);
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -70,14 +104,13 @@ export function AdminBooksPage() {
       if (imageFile) data.append("image", imageFile);
 
       if (editingId) {
-        // PHP won't parse a raw PUT multipart body, so spoof it as POST
         data.append("_method", "PUT");
         await api.post(`/books/${editingId}`, data);
       } else {
         await api.post("/books", data);
       }
       cancelEdit();
-      load();
+      await fetchBooks();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -89,7 +122,11 @@ export function AdminBooksPage() {
     if (!confirm(`Delete "${book.title}"?`)) return;
     try {
       await api.delete(`/books/${book.id}`);
-      load();
+      setBooks((prev) => {
+        const next = prev.filter((b) => b.id !== book.id);
+        writeCache(BOOKS_CACHE_KEY, next);
+        return next;
+      });
     } catch (err) {
       setError(err.message);
     }
@@ -98,10 +135,17 @@ export function AdminBooksPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
-      <div className="mb-8 border-b border-gray-200 pb-5">
+      <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-5">
         <h1 className="text-2xl font-bold tracking-tight text-[#4f4023] sm:text-3xl">
           Manage Books
         </h1>
+        <button
+          type="button"
+          onClick={fetchBooks}
+          className="text-xs font-semibold text-gray-500 underline underline-offset-4 hover:text-gray-800"
+        >
+          Refresh
+        </button>
       </div>
 
       {/* Error Alert Box */}

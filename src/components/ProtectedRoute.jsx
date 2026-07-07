@@ -17,7 +17,7 @@ export function ProtectedRoute({ children, adminOnly = false }) {
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />; // home page (guests can view books, but not borrow or manage them)
   if (adminOnly && !isAdmin) return <Navigate to="/" replace />;
 
   return children;

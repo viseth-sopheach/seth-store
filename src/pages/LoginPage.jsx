@@ -83,7 +83,6 @@ export function LoginPage() {
           </button>
         </form>
 
-        {/* Footer Link */}
         <p className="mt-6 text-center text-sm text-gray-500">
           No account?{" "}
           <Link

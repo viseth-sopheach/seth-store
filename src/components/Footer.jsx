@@ -10,7 +10,6 @@ export function Footer() {
     <footer className="w-full border-t border-[#E5DFD1] bg-[#FBF8F2]">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start gap-4 md:flex-row md:items-start">
-          {/* Wordmark */}
           <div className="flex flex-1 flex-col gap-1">
             <span
               className="text-lg tracking-tight text-[#211F1C]"
@@ -28,7 +27,6 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Links */}
           <nav className="flex flex-shrink-0 flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium">
             <Link to="/" className={linkStyle}>
               Books
@@ -39,7 +37,6 @@ export function Footer() {
           </nav>
         </div>
 
-        {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-2 border-t border-[#E5DFD1] pt-4 text-xs text-[#6B6558] sm:flex-row">
           <span>&copy; {year} Library. Let's read together!</span>
           <span className="inline-flex items-center gap-1.5">

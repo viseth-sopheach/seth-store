@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
-// Laravel date casts serialize as "YYYY-MM-DD" (or a full ISO string).
-// Render everything as dd/mm/yyyy per the required format.
+const CACHE_KEY = "borrows_cache";
+
 function formatDate(value) {
   if (!value) return "—";
   const d = new Date(value);
@@ -15,16 +15,11 @@ function formatDate(value) {
 }
 
 const STATUS_STYLES = {
-  pending:
-    "bg-gray-100 text-gray-700 border border-gray-200",
-  approved:
-    "bg-black text-white border border-black",
-  returned:
-    "bg-gray-800 text-white border border-gray-800",
-  rejected:
-    "bg-gray-300 text-gray-900 border border-gray-400",
-  cancelled:
-    "bg-gray-100 text-gray-500 border border-gray-200",
+  pending: "bg-gray-100 text-gray-700 border border-gray-200",
+  approved: "bg-black text-white border border-black",
+  returned: "bg-gray-800 text-white border border-gray-800",
+  rejected: "bg-gray-300 text-gray-900 border border-gray-400",
+  cancelled: "bg-gray-100 text-gray-500 border border-gray-200",
 };
 
 function StatusBadge({ status }) {
@@ -38,29 +33,64 @@ function StatusBadge({ status }) {
   );
 }
 
+function readCache() {
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(data) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore storage write failures
+  }
+}
+
 export function MyBorrowsPage() {
   const { isAdmin } = useAuth();
-  const [borrows, setBorrows] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [borrows, setBorrows] = useState(() => readCache() ?? []);
+  const [loading, setLoading] = useState(() => readCache() === null);
   const [error, setError] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
-  function load() {
+  function fetchBorrows() {
     setLoading(true);
     api
       .get("/books_borrowed")
-      .then(setBorrows)
+      .then((data) => {
+        setBorrows(data);
+        writeCache(data);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }
 
-  useEffect(load, []);
+  useEffect(() => {
+    if (readCache() !== null) {
+      // Already have data from earlier this session, no re fetching needed.
+      return;
+    }
+    fetchBorrows();
+  }, []);
+
+  // update both state and cache together after a mutation.
+  function applyUpdate(updater) {
+    setBorrows((prev) => {
+      const next = updater(prev);
+      writeCache(next);
+      return next;
+    });
+  }
 
   async function handleApprove(borrow) {
     setBusyId(borrow.id);
     try {
       const updated = await api.patch(`/books_borrowed/${borrow.id}/approve`);
-      setBorrows((prev) =>
+      applyUpdate((prev) =>
         prev.map((b) => (b.id === borrow.id ? updated : b)),
       );
     } catch (err) {
@@ -74,7 +104,7 @@ export function MyBorrowsPage() {
     setBusyId(borrow.id);
     try {
       const updated = await api.patch(`/books_borrowed/${borrow.id}/reject`);
-      setBorrows((prev) =>
+      applyUpdate((prev) =>
         prev.map((b) => (b.id === borrow.id ? updated : b)),
       );
     } catch (err) {
@@ -88,7 +118,9 @@ export function MyBorrowsPage() {
     setBusyId(borrow.id);
     try {
       const updated = await api.patch(`/books_borrowed/${borrow.id}/return`);
-      setBorrows((prev) => prev.map((b) => (b.id === borrow.id ? updated : b)));
+      applyUpdate((prev) =>
+        prev.map((b) => (b.id === borrow.id ? updated : b)),
+      );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -100,7 +132,7 @@ export function MyBorrowsPage() {
     setBusyId(borrow.id);
     try {
       await api.delete(`/books_borrowed/${borrow.id}`);
-      setBorrows((prev) =>
+      applyUpdate((prev) =>
         prev.map((b) =>
           b.id === borrow.id ? { ...b, status: "cancelled" } : b,
         ),
@@ -126,16 +158,17 @@ export function MyBorrowsPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
-      <div className="mb-8 border-b border-gray-200 pb-5">
+      <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-5">
         <h1 className="text-2xl font-bold tracking-tight text-[#4f4023] sm:text-3xl">
           {isAdmin ? "All Borrows" : "My Borrows"}
         </h1>
-        {/* {!isAdmin && (
-          <p className="mt-2 text-sm text-gray-500">
-            Track your borrow requests and see due dates once they're
-            approved.
-          </p>
-        )} */}
+        <button
+          type="button"
+          onClick={fetchBorrows}
+          className="text-xs font-semibold text-gray-500 underline underline-offset-4 hover:text-gray-800"
+        >
+          Refresh
+        </button>
       </div>
 
       {/* Error Message Box */}
@@ -187,10 +220,7 @@ export function MyBorrowsPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {borrows.map((b) => (
-                  <tr
-                    key={b.id}
-                    className="transition-colors hover:bg-gray-50"
-                  >
+                  <tr key={b.id} className="transition-colors hover:bg-gray-50">
                     <td className="whitespace-nowrap px-6 py-4 font-semibold text-black">
                       {b.title}
                     </td>

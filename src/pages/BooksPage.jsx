@@ -3,21 +3,71 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { BookCard } from "../components/BookCard";
 
+const CACHE_KEY = "books_cache";
+
 export function BooksPage() {
   const { user } = useAuth();
-  const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [books, setBooks] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem(CACHE_KEY);
+    } catch {
+      return true;
+    }
+  });
   const [error, setError] = useState(null);
   const [borrowingId, setBorrowingId] = useState(null);
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
+    let cached = null;
+    try {
+      cached = sessionStorage.getItem(CACHE_KEY);
+    } catch {
+      // sessionStorage unavailable
+    }
+
+    if (cached) {
+      // Already have data from a previous visit this session
+      return;
+    }
+
     api
       .get("/books")
-      .then(setBooks)
+      .then((data) => {
+        setBooks(data);
+        try {
+          sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        } catch {
+          // ignore storage write failures (e.g. quota, private mode)
+        }
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  function refetch() {
+    setLoading(true);
+    api
+      .get("/books")
+      .then((data) => {
+        setBooks(data);
+        try {
+          sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        } catch {
+          // ignore storage write failures
+        }
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }
 
   async function handleBorrow(book) {
     setMessage(null);
@@ -58,24 +108,27 @@ export function BooksPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
-      <div className="mb-8 border-b border-slate-100 pb-5 dark:border-slate-900">
+      <div className="mb-8 flex items-center justify-between border-b border-slate-100 pb-5 dark:border-slate-900">
         <h1 className="text-2xl font-bold tracking-tight text-[#4f4023] sm:text-3xl">
           Let's read together!
         </h1>
-        {/* <p className="mt-2 text-sm text-black">
-          Explore available titles and request to borrow — an admin will
-          review and approve your request.
-        </p> */}
+        <button
+          type="button"
+          onClick={refetch}
+          className="text-xs font-semibold text-slate-500 underline underline-offset-4 hover:text-slate-800"
+        >
+          Refresh
+        </button>
       </div>
 
       {/* Status Messages */}
       {message && (
         <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-          The book you borrowed has been successfully requested. Please wait for an admin to approve your request.
+          The book you borrowed has been successfully requested. Please wait for
+          an admin to approve your request.
         </div>
       )}
 
-      {/* Empty State vs Catalog Grid Layout */}
       {books.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-12 text-center dark:border-slate-800">
           <p className="text-sm font-medium text-slate-400 dark:text-slate-500">

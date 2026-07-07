@@ -50,14 +50,12 @@ export function RegisterPage() {
           </p>
         </div>
 
-        {/* Error Alert Box */}
         {error && (
           <div className="mb-4 rounded-lg bg-blue-50 p-3 border border-blue-200 text-xs font-medium text-blue-800">
             {error}
           </div>
         )}
 
-        {/* Form Elements */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
@@ -123,7 +121,6 @@ export function RegisterPage() {
           </button>
         </form>
 
-        {/* Footer Link */}
         <p className="mt-6 text-center text-sm text-gray-500">
           Already have an account?{" "}
           <Link
