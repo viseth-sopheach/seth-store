@@ -211,6 +211,9 @@ export function MyBorrowsPage() {
                     Due Date
                   </th>
                   <th scope="col" className="px-6 py-3.5">
+                    Return date
+                  </th>
+                  <th scope="col" className="px-6 py-3.5">
                     Status
                   </th>
                   <th scope="col" className="px-6 py-3.5 text-right">
@@ -239,6 +242,9 @@ export function MyBorrowsPage() {
                     )}
                     <td className="whitespace-nowrap px-6 py-4 text-gray-500">
                       {formatDate(b.due_date)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500">
+                      returned: {formatDate(b.return_date)}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <StatusBadge status={b.status} />
