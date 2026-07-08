@@ -62,8 +62,28 @@ export function AdminBooksPage() {
   }
 
   useEffect(() => {
-    if (readCache(BOOKS_CACHE_KEY) === null) fetchBooks();
-    if (readCache(CATEGORIES_CACHE_KEY) === null) fetchCategories();
+    const navigation = performance.getEntriesByType("navigation")[0];
+
+    // browser refresh
+    if (navigation?.type === "reload") {
+      sessionStorage.removeItem(BOOKS_CACHE_KEY);
+      sessionStorage.removeItem(CATEGORIES_CACHE_KEY);
+    }
+
+    const cachedBooks = readCache(BOOKS_CACHE_KEY);
+    const cachedCategories = readCache(CATEGORIES_CACHE_KEY);
+
+    if (cachedBooks) {
+      setBooks(cachedBooks);
+    } else {
+      fetchBooks();
+    }
+
+    if (cachedCategories) {
+      setCategories(cachedCategories);
+    } else {
+      fetchCategories();
+    }
   }, []);
 
   function update(field) {

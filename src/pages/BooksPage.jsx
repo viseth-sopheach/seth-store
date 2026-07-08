@@ -28,29 +28,37 @@ export function BooksPage() {
 
   useEffect(() => {
     let cached = null;
+
     try {
       cached = sessionStorage.getItem(CACHE_KEY);
-    } catch {
-      // sessionStorage unavailable
-    }
+    } catch {}
 
+    // Show cached books immediately
     if (cached) {
-      // Already have data from a previous visit this session
-      return;
+      try {
+        setBooks(JSON.parse(cached));
+        setLoading(false);
+      } catch {}
     }
 
+    // Always fetch latest books
     api
       .get("/books")
       .then((data) => {
         setBooks(data);
+
         try {
           sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        } catch {
-          // ignore storage write failures (e.g. quota, private mode)
+        } catch {}
+      })
+      .catch((err) => {
+        if (!cached) {
+          setError(err.message);
         }
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   function refetch() {
@@ -61,9 +69,7 @@ export function BooksPage() {
         setBooks(data);
         try {
           sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        } catch {
-          // ignore storage write failures
-        }
+        } catch {}
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));

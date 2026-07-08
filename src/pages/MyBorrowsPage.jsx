@@ -78,11 +78,31 @@ export function MyBorrowsPage() {
   }
 
   useEffect(() => {
-    if (readCache() !== null) {
-      // Already have data from earlier this session, no re fetching needed.
-      return;
+    const navigation = performance.getEntriesByType("navigation")[0];
+
+    const isReload = navigation?.type === "reload";
+
+    // If we have cache and this isn't a browser reload, use the cached data.
+    if (!isReload) {
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+          setBooks(JSON.parse(cached));
+          setLoading(false);
+          return;
+        }
+      } catch {}
     }
-    fetchBorrows();
+
+    // First visit or refreshing -> fetch latest data
+    api
+      .get("/books")
+      .then((data) => {
+        setBooks(data);
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   // update both state and cache together after a mutation.
