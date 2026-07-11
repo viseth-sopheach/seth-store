@@ -35,11 +35,11 @@ class DatabaseSeeder extends Seeder
 
     // Seed books
     $books = [
-      ['title' => 'Clean Code',              'author' => 'Robert C. Martin', 'genre' => 'Technology',  'price' => 39.99, 'stock' => 25],
-      ['title' => 'The Pragmatic Programmer', 'author' => 'Dave Thomas',      'genre' => 'Technology',  'price' => 44.99, 'stock' => 18],
-      ['title' => 'Harry Potter Vol.1',      'author' => 'J.K. Rowling',     'genre' => 'Fiction',     'price' => 14.99, 'stock' => 50],
-      ['title' => 'Atomic Habits',           'author' => 'James Clear',      'genre' => 'Self-Help',   'price' => 19.99, 'stock' => 30],
-      ['title' => 'Sapiens',                 'author' => 'Yuval Noah Harari', 'genre' => 'Non-Fiction', 'price' => 17.99, 'stock' => 22],
+      ['title' => 'Clean Code',              'author' => 'Robert C. Martin', 'price' => 39.99, 'stock' => 25],
+      ['title' => 'The Pragmatic Programmer', 'author' => 'Dave Thomas',      'price' => 44.99, 'stock' => 18],
+      ['title' => 'Harry Potter Vol.1',      'author' => 'J.K. Rowling',     'price' => 14.99, 'stock' => 50],
+      ['title' => 'Atomic Habits',           'author' => 'James Clear',      'price' => 19.99, 'stock' => 30],
+      ['title' => 'Sapiens',                 'author' => 'Yuval Noah Harari', 'price' => 17.99, 'stock' => 22],
     ];
 
     foreach ($books as $b) {
@@ -63,7 +63,7 @@ class DatabaseSeeder extends Seeder
     $computers = [
       ['name' => 'MacBook Pro 14"',   'brand' => 'Apple',    'type' => 'laptop',    'price' => 1999.00, 'specs' => 'M3 Pro, 18GB RAM, 512GB SSD',              'stock' => 10],
       ['name' => 'Dell XPS 15',       'brand' => 'Dell',     'type' => 'laptop',    'price' => 1599.00, 'specs' => 'Intel i7, 16GB RAM, 1TB SSD',               'stock' => 8],
-      ['name' => 'LG 27" 4K Monitor', 'brand' => 'LG',       'type' => 'monitor',   'price' => 499.00,  'specs' => '4K UHD, 60Hz, IPS Panel',                  'stock' => 15],
+      ['name' => 'LG 27" 4K Monitor', 'brand' => 'LG',       'type' => 'accessory', 'price' => 499.00,  'specs' => '4K UHD, 60Hz, IPS Panel',                  'stock' => 15],
       ['name' => 'Logitech MX Keys',  'brand' => 'Logitech', 'type' => 'accessory', 'price' => 119.00,  'specs' => 'Wireless, Backlit, Multi-Device',           'stock' => 30],
       ['name' => 'Custom Desktop PC', 'brand' => 'Custom',   'type' => 'desktop',   'price' => 1200.00, 'specs' => 'Ryzen 7, 32GB RAM, RTX 4060',              'stock' => 5],
     ];
