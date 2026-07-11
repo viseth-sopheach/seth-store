@@ -1,4 +1,11 @@
-export const BASE_URL = "http://127.0.0.1:8000/api/computer-products";
+// Base URL of the Laravel API. Set VITE_API_URL in your environment
+// (e.g. https://your-backend.onrender.com) — falls back to localhost for
+// local development if it isn't set.
+export const API_ROOT: string =
+  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
+  "http://127.0.0.1:8000";
+
+export const BASE_URL = `${API_ROOT}/api/computer-products`;
 
 const baseHeaders = {
   "Content-Type": "application/json",
@@ -47,7 +54,7 @@ export interface Product {
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthUser> {
-  const response = await fetch("http://127.0.0.1:8000/api/login", {
+  const response = await fetch(`${API_ROOT}/api/login`, {
     method: "POST",
     headers: baseHeaders,
     body: JSON.stringify({ email, password }),
@@ -68,7 +75,7 @@ export function logoutUser(): void {
 }
 
 export async function fetchAuthUser(): Promise<AuthUser> {
-  const response = await fetch("http://127.0.0.1:8000/api/user", {
+  const response = await fetch(`${API_ROOT}/api/user`, {
     method: "GET",
     headers: getHeaders(),
   });
@@ -224,7 +231,7 @@ export interface ProductCategory {
 
 // Add this function near your other fetch calls
 export async function getCategories(): Promise<ProductCategory[]> {
-  const response = await fetch("http://127.0.0.1:8000/api/categories", {
+  const response = await fetch(`${API_ROOT}/api/categories`, {
     method: "GET",
     headers: getHeaders(),
   });
@@ -256,7 +263,7 @@ export interface Order extends OrderPayload {
 // POST /api/orders
 
 export async function placeOrder(data: OrderPayload): Promise<Order> {
-  const response = await fetch("http://127.0.0.1:8000/api/orders", {
+  const response = await fetch(`${API_ROOT}/api/orders`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(data),
@@ -270,7 +277,7 @@ export async function placeOrder(data: OrderPayload): Promise<Order> {
   return response.json();
 }
  
-export const COMPUTER_SHOP_ORDERS_URL = "http://127.0.0.1:8000/api/computer-shop-orders";
+export const COMPUTER_SHOP_ORDERS_URL = `${API_ROOT}/api/computer-shop-orders`;
  
 export type ComputerShopOrderStatus = "pending" | "confirmed" | "delivered" | "cancelled";
  
@@ -408,7 +415,7 @@ export interface Feedback extends FeedbackPayload {
  * POST /api/feedback
  */
 export async function sendFeedback(data: FeedbackPayload): Promise<Feedback> {
-  const response = await fetch("http://127.0.0.1:8000/api/feedback", {
+  const response = await fetch(`${API_ROOT}/api/feedback`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(data),
@@ -427,7 +434,7 @@ export async function registerUser(
   email: string,
   password: string
 ): Promise<AuthUser> {
-  const response = await fetch("http://127.0.0.1:8000/api/register", {
+  const response = await fetch(`${API_ROOT}/api/register`, {
     method: "POST",
     headers: baseHeaders,
     body: JSON.stringify({
@@ -448,7 +455,7 @@ export async function registerUser(
   return data.user;
 }
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = `${API_ROOT}/api`;
 
 export interface AppUser {
   id: number;

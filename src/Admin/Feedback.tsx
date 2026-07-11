@@ -16,7 +16,10 @@ interface FeedbackResponse {
   user?: FeedbackUser;
 }
 
-const BASE_URL = "http://127.0.0.1:8000/api/feedback";
+const API_ROOT =
+  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
+  "http://127.0.0.1:8000";
+const BASE_URL = `${API_ROOT}/api/feedback`;
 const FEEDBACK_CACHE_KEY = "feedback_cache";
 
 function getHeaders() {

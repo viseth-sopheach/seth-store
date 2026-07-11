@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import PcProduct from "./pages/ProductListPage";
-import Desktop from "./pages/Desktop";
-import Accessory from "./pages/Accessory";
 import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/Navbar";
 import { NavbarProvider, useNavbarContext } from "./components/Navbarcontext";
