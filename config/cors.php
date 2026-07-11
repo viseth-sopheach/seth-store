@@ -1,6 +1,6 @@
 <?php
 
-$frontendUrl = env('FRONTEND_URL');
+$frontendUrls = array_filter(array_map('trim', explode(',', env('FRONTEND_URL', ''))));
 
 return [
 
@@ -21,7 +21,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => $frontendUrl ? [$frontendUrl] : ['*'],
+    'allowed_origins' => $frontendUrls ?: ['*'],
 
     'allowed_origins_patterns' => [],
 
