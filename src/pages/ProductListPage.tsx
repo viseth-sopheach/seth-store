@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import BuyModal from "../components/BuyModal";
 import Modal, { type ComputerPayload } from "../components/Modal";
 import BackgroundBlobs from "../components/Backgroundblobs";
@@ -12,6 +12,7 @@ import {
   deleteComputerProduct,
   createComputerProduct,
   updateComputerProduct,
+  normalizeApiAssetUrl,
   type Product,
 } from "../api/fetchApi";
 import { getCategoryString } from "../components/types";
@@ -28,7 +29,16 @@ function readProductsCache(): Product[] {
     const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.map((product) => ({
+      ...product,
+      image_url: normalizeApiAssetUrl(product.image_url),
+      image:
+        typeof product.image === "string"
+          ? normalizeApiAssetUrl(product.image) ?? product.image
+          : product.image,
+    }));
   } catch {
     return [];
   }
@@ -50,15 +60,6 @@ export default function PcProduct({pageType}: ProductListPageProps) {
   // ── Hydrate from localStorage immediately on mount (before fetch), so a
   // Ctrl+R shows the last-seen grid right away instead of skeletons/spinner.
   const hydratedRef = useRef(false);
-  if (!hydratedRef.current && products.length === 0) {
-    const cached = readProductsCache();
-    if (cached.length > 0) {
-      setProducts(cached);
-      // Don't mark productsLoaded(true) — a real fetch still runs below
-      // to confirm/refresh this in the background.
-    }
-    hydratedRef.current = true;
-  }
 
   // `loading` = true only when there's truly nothing to show yet (no live
   // data, no cache hit). `refreshing` = true for any background refetch —
@@ -78,6 +79,18 @@ export default function PcProduct({pageType}: ProductListPageProps) {
 
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
   const isLoggedIn = user !== null;
+
+  useEffect(() => {
+    if (hydratedRef.current || products.length > 0) return;
+
+    const cached = readProductsCache();
+    if (cached.length > 0) {
+      setProducts(cached);
+      setLoading(false);
+    }
+
+    hydratedRef.current = true;
+  }, [products.length, setProducts]);
 
   // ── Bootstrap — always (re)confirm with a background fetch, but never
   // block the UI if we already have cached or context data to show.
@@ -139,10 +152,10 @@ export default function PcProduct({pageType}: ProductListPageProps) {
     setEditing(null);
   };
 
-  const openAdd = () => {
+  const openAdd = useCallback(() => {
     setEditing(null);
     setModalOpen(true);
-  };
+  }, []);
 
   const openEdit = (p: Product) => {
     setEditing(p);

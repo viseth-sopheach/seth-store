@@ -7,6 +7,15 @@ export const API_BASE_URL: string = (
   (import.meta.env.DEV ? "/api" : "https://seth-store-api.onrender.com/api")
 ).replace(/\/$/, "");
 
+const DEFAULT_API_ORIGIN = "https://seth-store-api.onrender.com";
+const API_ASSET_ORIGIN = (
+  (import.meta.env.VITE_API_ASSET_ORIGIN as string | undefined) ||
+  (import.meta.env.VITE_API_URL as string | undefined) ||
+  (API_BASE_URL.startsWith("http")
+    ? new URL(API_BASE_URL).origin
+    : DEFAULT_API_ORIGIN)
+).replace(/\/$/, "");
+
 export const BASE_URL = `${API_BASE_URL}/computer-products`;
 
 const baseHeaders = {
@@ -55,6 +64,47 @@ export interface Product {
   updated_at?: string;
 }
 
+export function normalizeApiAssetUrl(url?: string | null): string | null {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+    const isLocalApiHost =
+      parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost";
+
+    if (isLocalApiHost && parsed.pathname.startsWith("/storage/")) {
+      return `${API_ASSET_ORIGIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+
+    return url;
+  } catch {
+    if (url.startsWith("/storage/")) {
+      return `${API_ASSET_ORIGIN}${url}`;
+    }
+
+    return url;
+  }
+}
+
+function normalizeProduct(product: Product): Product {
+  return {
+    ...product,
+    image_url: normalizeApiAssetUrl(product.image_url),
+    image:
+      typeof product.image === "string"
+        ? normalizeApiAssetUrl(product.image) ?? product.image
+        : product.image,
+  };
+}
+
+function normalizeProductsResponse(data: unknown): Product[] {
+  const list = Array.isArray(data)
+    ? data
+    : ((data as { data?: Product[] } | null)?.data ?? []);
+
+  return list.map((product) => normalizeProduct(product as Product));
+}
+
 export async function loginUser(email: string, password: string): Promise<AuthUser> {
   const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
@@ -77,6 +127,10 @@ export function logoutUser(): void {
 }
 
 export async function fetchAuthUser(): Promise<AuthUser> {
+  if (!localStorage.getItem("seth_token")) {
+    throw new Error("No auth token");
+  }
+
   const response = await fetch(`${API_BASE_URL}/user`, {
     method: "GET",
     headers: getHeaders(),
@@ -99,7 +153,7 @@ export async function getComputerProducts(): Promise<Product[]> {
     throw new Error(`Failed to fetch products: ${response.statusText}`);
   }
 
-  return response.json();
+  return normalizeProductsResponse(await response.json());
 }
 
 /**
@@ -112,7 +166,7 @@ export async function getComputerProduct(id: number | string): Promise<Product> 
     throw new Error(`Failed to fetch product ${id}: ${response.statusText}`);
   }
 
-  return response.json();
+  return normalizeProduct(await response.json());
 }
 
 /**
@@ -148,7 +202,7 @@ export async function createComputerProduct(data: Partial<Product>): Promise<Pro
     throw new Error(errorBody?.message || `Failed to create product: ${response.statusText}`);
   }
 
-  return response.json();
+  return normalizeProduct(await response.json());
 }
 
 /**
@@ -188,7 +242,7 @@ export async function updateComputerProduct(
       throw new Error(error?.message || "Update failed");
     }
 
-    return await response.json();
+    return normalizeProduct(await response.json());
   }
 
   const response = await fetch(`${BASE_URL}/${id}`, {
@@ -206,7 +260,7 @@ export async function updateComputerProduct(
     throw new Error(error?.message || "Update failed");
   }
 
-  return await response.json();
+  return normalizeProduct(await response.json());
 }
 /**
  * DELETE /api/computer-products/:id

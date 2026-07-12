@@ -5,6 +5,7 @@ import {
   useMemo,
   useEffect,
   useRef,
+  useCallback,
 } from "react";
 import type { ReactNode } from "react";
 import { fetchAuthUser, type AuthUser } from "../api/fetchApi";
@@ -46,26 +47,26 @@ export function NavbarProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoaded, setProductsLoaded] = useState(false);
 
-  const refreshAuth = async () => {
+  const refreshAuth = useCallback(async () => {
     try {
       const u = await fetchAuthUser();
       setUser(u);
     } catch {
       setUser(null);
     }
-  };
+  }, []);
 
   useEffect(() => {
     refreshAuth().finally(() => setAuthLoading(false));
-  }, []);
+  }, [refreshAuth]);
 
   useEffect(() => {
     const handler = () => refreshAuth();
     window.addEventListener("auth-change", handler);
     return () => window.removeEventListener("auth-change", handler);
-  }, []);
+  }, [refreshAuth]);
 
-  const setNavbarData = (next: NavbarData) => {
+  const setNavbarData = useCallback((next: NavbarData) => {
     setData((prev) => {
       const keys = new Set([...Object.keys(prev), ...Object.keys(next)]) as Set<
         keyof NavbarData
@@ -77,9 +78,9 @@ export function NavbarProvider({ children }: { children: ReactNode }) {
       }
       return prev; // identical content -> keep the same reference, no update
     });
-  };
+  }, []);
 
-  const clearNavbarData = () => setData({});
+  const clearNavbarData = useCallback(() => setData({}), []);
 
   const value = useMemo(
     () => ({
@@ -123,6 +124,7 @@ export function usePublishNavbarData(data: NavbarData) {
   useEffect(() => {
     setNavbarData(latestData.current);
   }, [
+    setNavbarData,
     data.productCount,
     data.loadingProducts,
     data.search,
@@ -132,5 +134,5 @@ export function usePublishNavbarData(data: NavbarData) {
 
   useEffect(() => {
     return () => clearNavbarData();
-  }, []);
+  }, [clearNavbarData]);
 }
