@@ -186,7 +186,7 @@ const Feedback = () => {
                   <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
                     {item.subject}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 min-w-[240px] max-w-md break-words">
+                  <td className="px-6 py-4 text-sm text-gray-600 min-w-60 max-w-md wrap-break-words">
                     {item.message}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
