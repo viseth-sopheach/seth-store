@@ -23,13 +23,22 @@ async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   const isJson = res.headers.get("content-type")?.includes("application/json");
-  const data = isJson ? await res.json().catch(() => null) : null;
+  const data = isJson
+    ? await res.json().catch(() => null)
+    : await res.text().catch(() => null);
 
   if (!res.ok) {
-    const message =
-      data?.message || data?.errors
-        ? JSON.stringify(data.errors ?? data.message)
-        : `Request failed (${res.status})`;
+    const serverMessage =
+      typeof data === "string"
+        ? data.trim().slice(0, 300)
+        : data?.errors || data?.message;
+    const message = serverMessage
+      ? `${res.status} ${res.statusText}: ${
+          typeof serverMessage === "string"
+            ? serverMessage
+            : JSON.stringify(serverMessage)
+        }`
+      : `Request failed (${res.status})`;
     const error = new Error(message);
     error.status = res.status;
     error.data = data;

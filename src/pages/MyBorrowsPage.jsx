@@ -87,7 +87,7 @@ export function MyBorrowsPage() {
       try {
         const cached = sessionStorage.getItem(CACHE_KEY);
         if (cached) {
-          setBooks(JSON.parse(cached));
+          setBorrows(JSON.parse(cached));
           setLoading(false);
           return;
         }
@@ -96,9 +96,9 @@ export function MyBorrowsPage() {
 
     // First visit or refreshing -> fetch latest data
     api
-      .get("/books")
+      .get("/books_borrowed")
       .then((data) => {
-        setBooks(data);
+        setBorrows(data);
         sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
       })
       .catch((err) => setError(err.message))
