@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import type { Order, OrderStatus } from "./dashBorad";
-import { authHeaders, StatusBadge } from "./dashBorad";
+import type { Order, OrderStatus } from "../pages/dashBorad";
+import { authHeaders, StatusBadge } from "../pages/dashBorad";
 import { API_URL } from "../fetchApi/fetchApi";
 
-// ─── Modal Meta configurations ────────────────────────────────────────────────
 const STATUS_META_MODAL = {
-  pending: { label: "Pending", textClass: "text-amber-700", bgClass: "bg-amber-100", borderClass: "border-amber-200" },
-  confirmed: { label: "Confirmed", textClass: "text-blue-700", bgClass: "bg-blue-100", borderClass: "border-blue-200" },
-  delivered: { label: "Delivered", textClass: "text-emerald-700", bgClass: "bg-emerald-100", borderClass: "border-emerald-200" },
-  cancelled: { label: "Cancelled", textClass: "text-red-700", bgClass: "bg-red-100", borderClass: "border-red-200" },
+  pending: { label: "Pending", textClass: "text-amber-700", bgClass: "bg-amber-50", borderClass: "border-amber-200" },
+  confirmed: { label: "Confirmed", textClass: "text-blue-700", bgClass: "bg-blue-50", borderClass: "border-blue-200" },
+  delivered: { label: "Delivered", textClass: "text-emerald-700", bgClass: "bg-emerald-50", borderClass: "border-emerald-200" },
+  cancelled: { label: "Cancelled", textClass: "text-red-700", bgClass: "bg-red-50", borderClass: "border-red-200" },
 };
 
 const NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
@@ -18,7 +17,6 @@ const NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
   cancelled: [],
 };
 
-// ─── Modal Local API Call ─────────────────────────────────────────────────────
 async function fetchOrder(id: number): Promise<Order> {
   const res = await fetch(`${API_URL}/orders/${id}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Failed to fetch order: ${res.statusText}`);
@@ -74,29 +72,28 @@ export default function OrderModal({ orderId, onClose, onStatusChange }: OrderMo
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/45 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white rounded-xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-          <span className="font-bold text-lg text-gray-900">Order #{orderId}</span>
-          <button
-            onClick={onClose}
-            className="bg-none border-none cursor-pointer text-xl text-gray-400 p-1 hover:text-gray-600 transition-colors"
-            aria-label="Close"
-          >
+      <div className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-stone-100 px-5 py-4 sm:px-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-400">Order details</p>
+            <h2 className="mt-1 text-lg font-semibold text-stone-900">Order #{orderId}</h2>
+          </div>
+          <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-xl text-stone-400 transition hover:text-stone-600" aria-label="Close">
             ✕
           </button>
         </div>
 
-        <div className="p-6">
-          {loading && <p className="text-gray-500 text-center">Loading…</p>}
-          {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        <div className="p-5 sm:p-6">
+          {loading && <p className="text-center text-sm text-stone-500">Loading…</p>}
+          {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
           {order && (
             <>
-              <div className="grid grid-cols-2 gap-x-5 gap-y-3.5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {[
                   ["Product", order.product_name],
                   ["Type", order.product_type],
@@ -107,39 +104,27 @@ export default function OrderModal({ orderId, onClose, onStatusChange }: OrderMo
                   ["Placed", new Date(order.created_at).toLocaleString()],
                   ["Last Updated", new Date(order.updated_at).toLocaleString()],
                 ].map(([label, val]) => (
-                  <div key={String(label)}>
-                    <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-                      {label}
-                    </div>
-                    <div className="text-sm text-gray-900 font-medium">{val}</div>
+                  <div key={String(label)} className="rounded-2xl border border-stone-100 bg-stone-50 px-4 py-3">
+                    <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-400">{label}</div>
+                    <div className="text-sm font-medium text-stone-700">{val}</div>
                   </div>
                 ))}
-                <div>
-                  <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-                    Status
-                  </div>
+                <div className="rounded-2xl border border-stone-100 bg-stone-50 px-4 py-3">
+                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-400">Status</div>
                   <StatusBadge status={order.status} />
                 </div>
               </div>
 
               {NEXT_STATUSES[order.status].length > 0 && (
-                <div className="mt-6 pt-5 border-t border-gray-100">
-                  <div className="text-xs font-semibold text-gray-500 mb-2.5 uppercase tracking-wide">
-                    Move to
-                  </div>
-                  <div className="flex gap-2.5 flex-wrap">
+                <div className="mt-6 border-t border-stone-100 pt-5">
+                  <div className="mb-2.5 text-xs font-semibold uppercase tracking-[0.24em] text-stone-400">Move to</div>
+                  <div className="flex flex-wrap gap-2.5">
                     {NEXT_STATUSES[order.status].map((s) => (
                       <button
                         key={s}
                         disabled={updating}
                         onClick={() => handleStatusChange(s)}
-                        className={`border rounded-lg px-4 py-1.5 font-semibold text-sm transition-all ${
-                          STATUS_META_MODAL[s].bgClass
-                        } ${STATUS_META_MODAL[s].textClass} ${STATUS_META_MODAL[s].borderClass} ${
-                          updating
-                            ? "opacity-60 cursor-not-allowed"
-                            : "hover:brightness-95 cursor-pointer"
-                        }`}
+                        className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${STATUS_META_MODAL[s].bgClass} ${STATUS_META_MODAL[s].textClass} ${STATUS_META_MODAL[s].borderClass} ${updating ? "cursor-not-allowed opacity-60" : "hover:brightness-95"}`}
                       >
                         {STATUS_META_MODAL[s].label}
                       </button>

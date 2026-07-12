@@ -2,9 +2,10 @@ import { useEffect, useState, useCallback } from "react";
 import { fetchAuthUser } from "../fetchApi/fetchApi";
 import type { AuthUser } from "../fetchApi/fetchApi";
 import { MdOutlineDashboard } from "react-icons/md";
-import OrderModal from "./OrderModal";
+import OrderModal from "../components/OrderModal";
+import { API_URL } from "../fetchApi/fetchApi";
+import { useNavigate } from "react-router-dom";
 
-// ─── Exported Types
 export type OrderStatus = "pending" | "confirmed" | "delivered" | "cancelled";
 export type ProductType = "drink" | "book" | "computer" | "phone";
 
@@ -23,8 +24,6 @@ export interface Order {
   created_at: string;
   updated_at: string;
 }
-
-import { API_URL } from "../fetchApi/fetchApi";
 
 export function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("seth_token");
@@ -48,85 +47,43 @@ export async function deleteOrder(id: number): Promise<void> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new Error(
-      body?.message || `Failed to delete order: ${res.statusText}`,
-    );
+    throw new Error(body?.message || `Failed to delete order: ${res.statusText}`);
   }
 }
 
-// ─── Local Sub-Components
-function Spinner({
-  size = 20,
-  color = "text-indigo-600",
-}: {
-  size?: number;
-  color?: string;
-}) {
+function Spinner({ size = 20, color = "text-blue-600" }: { size?: number; color?: string }) {
   return (
     <div
-      className={`animate-spin inline-block rounded-full border-2 border-current border-t-transparent ${color}`}
+      className={`inline-block animate-spin rounded-full border-2 border-current border-t-transparent ${color}`}
       style={{ width: size, height: size }}
     />
   );
 }
 
-function StatCard({
-  label,
-  value,
-  borderTopClass,
-}: {
-  label: string;
-  value: string | number;
-  borderTopClass: string;
-}) {
+function StatCard({ label, value, borderTopClass }: { label: string; value: string | number; borderTopClass: string }) {
   return (
-    <div
-      className={`bg-white border border-gray-200 border-t-4 rounded-xl p-5 min-w-40 flex-1 basis-40 ${borderTopClass}`}
-    >
-      <div className="text-2xl font-bold text-gray-900 tracking-tight">
-        {value}
-      </div>
-      <div className="text-xs text-gray-500 mt-1 font-medium tracking-widest uppercase">
-        {label}
-      </div>
+    <div className={`min-w-40 flex-1 basis-40 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm ${borderTopClass}`}>
+      <div className="text-2xl font-semibold tracking-tight text-stone-900">{value}</div>
+      <div className="mt-1 text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">{label}</div>
     </div>
   );
 }
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
   const STATUS_META = {
-    pending: {
-      label: "Pending",
-      textClass: "text-amber-700",
-      bgClass: "bg-amber-100",
-    },
-    confirmed: {
-      label: "Confirmed",
-      textClass: "text-blue-700",
-      bgClass: "bg-blue-100",
-    },
-    delivered: {
-      label: "Delivered",
-      textClass: "text-emerald-700",
-      bgClass: "bg-emerald-100",
-    },
-    cancelled: {
-      label: "Cancelled",
-      textClass: "text-red-700",
-      bgClass: "bg-red-100",
-    },
+    pending: { label: "Pending", textClass: "text-amber-700", bgClass: "bg-amber-50" },
+    confirmed: { label: "Confirmed", textClass: "text-blue-700", bgClass: "bg-blue-50" },
+    delivered: { label: "Delivered", textClass: "text-emerald-700", bgClass: "bg-emerald-50" },
+    cancelled: { label: "Cancelled", textClass: "text-red-700", bgClass: "bg-red-50" },
   };
   const { label, textClass, bgClass } = STATUS_META[status];
   return (
-    <span
-      className={`rounded-md px-2.5 py-0.5 text-xs font-semibold tracking-wide inline-block ${bgClass} ${textClass}`}
-    >
+    <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide ${bgClass} ${textClass}`}>
       {label}
     </span>
   );
 }
 
-// ─── Main Component
 export default function Dashboard() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -137,12 +94,10 @@ export default function Dashboard() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
   useEffect(() => {
-    fetchAuthUser()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setAuthLoading(false));
+    fetchAuthUser().then(setUser).catch(() => setUser(null)).finally(() => setAuthLoading(false));
   }, []);
 
   const loadOrders = useCallback(async () => {
@@ -158,18 +113,17 @@ export default function Dashboard() {
     }
   }, []);
 
-  // ✅ Auto-poll every 15 seconds for new orders
   useEffect(() => {
-    if (user?.role !== "admin") return;
+    if (!isAdmin) return;
 
-    loadOrders(); // immediate first load
+    loadOrders();
 
     const interval = setInterval(() => {
       loadOrders();
-    }, 15000); // poll every 15 seconds
+    }, 15000);
 
-    return () => clearInterval(interval); // cleanup on unmount
-  }, [user, loadOrders]);
+    return () => clearInterval(interval);
+  }, [isAdmin, loadOrders]);
 
   async function handleDelete(id: number) {
     if (!confirm(`Cancel and delete order #${id}?`)) return;
@@ -194,10 +148,10 @@ export default function Dashboard() {
     confirmed: orders.filter((o) => o.status === "confirmed").length,
     delivered: orders.filter((o) => o.status === "delivered").length,
     cancelled: orders.filter((o) => o.status === "cancelled").length,
-    revenue: orders
-      .filter((o) => o.status !== "cancelled")
-      .reduce((sum, o) => sum + Number(o.total_price), 0),
+    revenue: orders.filter((o) => o.status !== "cancelled").reduce((sum, o) => sum + Number(o.total_price), 0),
   };
+
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("seth_token");
@@ -220,257 +174,133 @@ export default function Dashboard() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 font-sans">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50">
         <Spinner />
-        <p className="text-gray-500 mt-3 text-sm">Verifying session…</p>
+        <p className="mt-3 text-sm text-stone-500">Verifying session…</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 font-sans">
-        <div className="text-4xl mb-3">🔒</div>
-        <h2 className="text-gray-900 font-bold text-xl">Access Denied</h2>
-        <p className="text-gray-500 mt-2 text-sm">Please log in to continue.</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 text-center">
+        <div className="mb-3 text-4xl">🔒</div>
+        <h2 className="text-xl font-semibold text-stone-900">Access denied</h2>
+        <p className="mt-2 text-sm text-stone-500">Please log in to continue.</p>
       </div>
     );
   }
 
-  if (user.role !== "admin") {
+  if (!isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 font-sans">
-        {/* <div className="text-4xl mb-3">🚫</div>
-        <h2 className="text-gray-900 font-bold text-xl">Admins Only</h2>
-        <p className="text-gray-500 mt-2 text-sm">
-          Your account (<strong>{user.email}</strong>) does not have dashboard access.
-        </p> */}
-        <p>404:NotFound</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 text-center">
+        <p className="text-sm text-stone-500">404: Not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans antialiased text-gray-800">
-      <header className="bg-white border-b border-gray-200 px-8 h-16 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div className="px-4 sm:px-6 md:px-8 lg:px-10 flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center text-sm text-white">
-            <MdOutlineDashboard />
+    <div className="min-h-screen bg-stone-50 text-stone-800">
+      <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-sm font-semibold text-white">
+              <MdOutlineDashboard />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-stone-900">Admin dashboard</p>
+              <p className="text-xs text-stone-500">Monitor and manage orders</p>
+            </div>
           </div>
-          <span className="font-bold text-base text-gray-900 tracking-tight">
-            Admin Dashboard
-          </span>
-        </div>
-        <div className="flex items-center gap-2.5">
-          {/* <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-xs">
-            {user.name.charAt(0).toUpperCase()}
-          </div> */}
-          <span className="bg-green-300 py-2.5 px-2.5 rounded-md text-sm text-gray-700 font-medium">
-            {user.name}
-          </span>
-          {/* <span className="text-[11px] font-semibold bg-purple-50 text-purple-700 rounded-md px-2 py-0.5 tracking-wider uppercase">
-            Admin
-          </span> */}
-          <button
-            onClick={handleLogout}
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-stone-900/90 backdrop-blur-md hover:bg-stone-800/90 active:scale-95 text-white text-sm font-semibold border border-stone-700/40 shadow-[0_4px_16px_rgba(15,23,42,0.28)] transition-all duration-200 cursor-pointer"
-          >
-            Logout
-          </button>
+
+          <div className="flex items-center gap-2.5">
+            <button  onClick={()=>navigate(-1)} className="bg-blue-400 rounded-2xl p-2">
+              Products
+            </button>
+            <span className="rounded-full bg-stone-100 px-3 py-2 text-sm font-medium text-stone-700">{user.name}</span>
+            <button onClick={handleLogout} className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="p-8 max-w-7xl mx-auto">
-        <div className="flex gap-4 flex-wrap mb-8">
-          <StatCard
-            label="Total Orders"
-            value={stats.total}
-            borderTopClass="border-t-indigo-500"
-          />
-          <StatCard
-            label="Pending"
-            value={stats.pending}
-            borderTopClass="border-t-amber-500"
-          />
-          <StatCard
-            label="Confirmed"
-            value={stats.confirmed}
-            borderTopClass="border-t-blue-500"
-          />
-          <StatCard
-            label="Delivered"
-            value={stats.delivered}
-            borderTopClass="border-t-emerald-500"
-          />
-          <StatCard
-            label="Cancelled"
-            value={stats.cancelled}
-            borderTopClass="border-t-red-500"
-          />
-          <StatCard
-            label="Revenue (Non-Cancelled)"
-            value={`$${stats.revenue.toFixed(2)}`}
-            borderTopClass="border-t-purple-500"
-          />
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-6 flex flex-wrap gap-4">
+          <StatCard label="Total orders" value={stats.total} borderTopClass="border-t-4 border-t-blue-600" />
+          <StatCard label="Pending" value={stats.pending} borderTopClass="border-t-4 border-t-amber-500" />
+          <StatCard label="Confirmed" value={stats.confirmed} borderTopClass="border-t-4 border-t-blue-500" />
+          <StatCard label="Delivered" value={stats.delivered} borderTopClass="border-t-4 border-t-emerald-500" />
+          <StatCard label="Cancelled" value={stats.cancelled} borderTopClass="border-t-4 border-t-red-500" />
+          <StatCard label="Revenue" value={`$${stats.revenue.toFixed(2)}`} borderTopClass="border-t-4 border-t-stone-900" />
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between p-5 border-b border-gray-100 flex-wrap gap-3">
-            <h2 className="m-0 font-bold text-base text-gray-900">
-              Orders
-              <span className="ml-2 text-xs font-medium text-gray-400">
-                {visible.length} of {orders.length}
-              </span>
-            </h2>
+        <div className="overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 px-4 py-4 sm:px-5">
+            <div>
+              <h2 className="text-base font-semibold text-stone-900">Orders</h2>
+              <p className="text-sm text-stone-500">{visible.length} of {orders.length} visible</p>
+            </div>
 
-            <div className="flex gap-2.5 flex-wrap">
-              <input
-                type="text"
-                placeholder="Search product, table, floor…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none w-56 focus:border-indigo-500 transition-colors"
-              />
-
-              <select
-                value={filterStatus}
-                onChange={(e) =>
-                  setFilterStatus(e.target.value as OrderStatus | "all")
-                }
-                className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 bg-white cursor-pointer outline-none focus:border-indigo-500 transition-colors"
-              >
-                <option value="all">All Statuses</option>
+            <div className="flex flex-wrap gap-2.5">
+              <input type="text" placeholder="Search product, table, floor…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full min-w-[220px] rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-blue-500 focus:bg-white sm:w-56" />
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as OrderStatus | "all")} className="rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 outline-none transition focus:border-blue-500">
+                <option value="all">All statuses</option>
                 <option value="pending">Pending</option>
                 <option value="confirmed">Confirmed</option>
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
               </select>
-
-              <button
-                onClick={loadOrders}
-                disabled={ordersLoading}
-                className={`bg-indigo-600 text-white border-none rounded-lg px-4 py-1.5 font-semibold text-sm flex items-center gap-1.5 transition-all ${
-                  ordersLoading
-                    ? "opacity-75 cursor-not-allowed"
-                    : "hover:bg-indigo-700 cursor-pointer"
-                }`}
-              >
-                {ordersLoading ? <Spinner size={14} color="text-white" /> : "↻"}{" "}
-                Refresh
-              </button>
-              <button
-                onClick={() => window.history.back()}
-                className="bg-cyan-100 text-cyan-800 font-semibold text-sm rounded-lg py-1.5 px-4 border border-cyan-200 hover:bg-cyan-200 transition-colors cursor-pointer"
-              >
-                Back to drink
+              <button onClick={loadOrders} disabled={ordersLoading} className={`flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition ${ordersLoading ? "cursor-not-allowed opacity-70" : "hover:bg-blue-700"}`}>
+                {ordersLoading ? <Spinner size={14} color="text-white" /> : "↻"} Refresh
               </button>
             </div>
           </div>
 
-          {error && (
-            <div className="px-5 py-3 bg-red-50 border-b border-red-100 text-red-600 text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="border-b border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700 sm:px-5">{error}</div>}
 
           <div className="overflow-x-auto">
             {ordersLoading && orders.length === 0 ? (
               <div className="p-12 text-center">
                 <Spinner />
-                <p className="text-gray-400 mt-2 text-sm">Loading orders…</p>
+                <p className="mt-2 text-sm text-stone-500">Loading orders…</p>
               </div>
             ) : visible.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 text-sm">
-                No orders match your filters.
-              </div>
+              <div className="p-12 text-center text-sm text-stone-500">No orders match your filters.</div>
             ) : (
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-gray-50">
-                    {[
-                      "#",
-                      "Product",
-                      "Type",
-                      "Floor / Table",
-                      "Qty",
-                      "Total",
-                      "Status",
-                      "Placed",
-                      "Actions",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        className="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 whitespace-nowrap"
-                      >
+                  <tr className="bg-stone-50 text-left text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
+                    {["#", "Product", "Type", "Floor / Table", "Qty", "Total", "Status", "Placed", "Actions"].map((h) => (
+                      <th key={h} className="whitespace-nowrap border-b border-stone-100 px-4 py-3">
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {visible.map((order, i) => (
-                    <tr
-                      key={order.id}
-                      className={`transition-colors hover:bg-sky-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
-                    >
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="font-semibold text-indigo-600">
-                          #{order.id}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle">
-                        <span className="font-medium text-gray-900">
-                          {order.product_name}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="text-[11px] font-semibold bg-gray-100 text-gray-700 rounded-md px-2 py-0.5 capitalize">
-                          {order.product_type}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="text-sm text-gray-600">
-                          {order.floor} — T{order.table_number}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="font-medium">{order.quantity}</span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <span className="font-semibold text-emerald-600">
-                          ${Number(order.total_price).toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <StatusBadge status={order.status} />
-                      </td>
-                      <td className="px-4 py-3 text-xs text-gray-400 align-middle whitespace-nowrap">
+                <tbody className="divide-y divide-stone-100">
+                  {visible.map((order) => (
+                    <tr key={order.id} className="bg-white transition-colors hover:bg-stone-50">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-blue-600">#{order.id}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-stone-900">{order.product_name}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-stone-600"><span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-semibold capitalize text-stone-600">{order.product_type}</span></td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-stone-600">{order.floor} — T{order.table_number}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-stone-600">{order.quantity}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-stone-900">${Number(order.total_price).toFixed(2)}</td>
+                      <td className="whitespace-nowrap px-4 py-3"><StatusBadge status={order.status} /></td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-stone-500">
                         {new Date(order.created_at).toLocaleDateString()}
-                        <span className="block text-[11px] text-gray-400 mt-0.5">
-                          {new Date(order.created_at).toLocaleTimeString()}
-                        </span>
+                        <span className="mt-0.5 block text-[11px]">{new Date(order.created_at).toLocaleTimeString()}</span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 align-middle whitespace-nowrap">
-                        <button
-                          onClick={() => setSelectedOrderId(order.id)}
-                          className="bg-transparent border border-indigo-600 text-indigo-600 rounded-md px-3 py-1 font-semibold text-xs cursor-pointer hover:bg-indigo-50 transition-colors"
-                        >
-                          View
-                        </button>
-                        {order.status !== "delivered" &&
-                          order.status !== "cancelled" && (
-                            <button
-                              onClick={() => handleDelete(order.id)}
-                              disabled={deletingId === order.id}
-                              className={`border border-red-500 text-red-500 bg-transparent rounded-md px-3 py-1 font-semibold text-xs ml-1.5 transition-colors ${
-                                deletingId === order.id
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : "hover:bg-red-50 cursor-pointer"
-                              }`}
-                            >
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <div className="flex flex-wrap gap-2">
+                          <button onClick={() => setSelectedOrderId(order.id)} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100">View</button>
+                          {order.status !== "delivered" && order.status !== "cancelled" && (
+                            <button onClick={() => handleDelete(order.id)} disabled={deletingId === order.id} className={`rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition ${deletingId === order.id ? "cursor-not-allowed opacity-60" : "hover:bg-red-100"}`}>
                               {deletingId === order.id ? "…" : "Delete"}
                             </button>
                           )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -482,11 +312,7 @@ export default function Dashboard() {
       </main>
 
       {selectedOrderId !== null && (
-        <OrderModal
-          orderId={selectedOrderId}
-          onClose={() => setSelectedOrderId(null)}
-          onStatusChange={handleStatusChange}
-        />
+        <OrderModal orderId={selectedOrderId} onClose={() => setSelectedOrderId(null)} onStatusChange={handleStatusChange} />
       )}
     </div>
   );
