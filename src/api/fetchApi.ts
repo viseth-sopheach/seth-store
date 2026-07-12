@@ -1,11 +1,13 @@
-// Base URL of the Laravel API. Set VITE_API_URL in your environment
-// (e.g. https://your-backend.onrender.com) — falls back to localhost for
-// local development if it isn't set.
-export const API_ROOT: string =
-  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
-  "http://127.0.0.1:8000";
+// Full API base URL, including /api. Set VITE_API_BASE_URL in Vite env files.
+export const API_BASE_URL: string = (
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  (import.meta.env.VITE_API_URL
+    ? `${(import.meta.env.VITE_API_URL as string).replace(/\/$/, "")}/api`
+    : undefined) ||
+  (import.meta.env.DEV ? "/api" : "https://seth-store-api.onrender.com/api")
+).replace(/\/$/, "");
 
-export const BASE_URL = `${API_ROOT}/api/computer-products`;
+export const BASE_URL = `${API_BASE_URL}/computer-products`;
 
 const baseHeaders = {
   "Content-Type": "application/json",
@@ -54,7 +56,7 @@ export interface Product {
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthUser> {
-  const response = await fetch(`${API_ROOT}/api/login`, {
+  const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
     headers: baseHeaders,
     body: JSON.stringify({ email, password }),
@@ -75,7 +77,7 @@ export function logoutUser(): void {
 }
 
 export async function fetchAuthUser(): Promise<AuthUser> {
-  const response = await fetch(`${API_ROOT}/api/user`, {
+  const response = await fetch(`${API_BASE_URL}/user`, {
     method: "GET",
     headers: getHeaders(),
   });
@@ -231,7 +233,7 @@ export interface ProductCategory {
 
 // Add this function near your other fetch calls
 export async function getCategories(): Promise<ProductCategory[]> {
-  const response = await fetch(`${API_ROOT}/api/categories`, {
+  const response = await fetch(`${API_BASE_URL}/categories`, {
     method: "GET",
     headers: getHeaders(),
   });
@@ -263,7 +265,7 @@ export interface Order extends OrderPayload {
 // POST /api/orders
 
 export async function placeOrder(data: OrderPayload): Promise<Order> {
-  const response = await fetch(`${API_ROOT}/api/orders`, {
+  const response = await fetch(`${API_BASE_URL}/orders`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(data),
@@ -277,7 +279,7 @@ export async function placeOrder(data: OrderPayload): Promise<Order> {
   return response.json();
 }
  
-export const COMPUTER_SHOP_ORDERS_URL = `${API_ROOT}/api/computer-shop-orders`;
+export const COMPUTER_SHOP_ORDERS_URL = `${API_BASE_URL}/computer-shop-orders`;
  
 export type ComputerShopOrderStatus = "pending" | "confirmed" | "delivered" | "cancelled";
  
@@ -415,7 +417,7 @@ export interface Feedback extends FeedbackPayload {
  * POST /api/feedback
  */
 export async function sendFeedback(data: FeedbackPayload): Promise<Feedback> {
-  const response = await fetch(`${API_ROOT}/api/feedback`, {
+  const response = await fetch(`${API_BASE_URL}/feedback`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(data),
@@ -434,7 +436,7 @@ export async function registerUser(
   email: string,
   password: string
 ): Promise<AuthUser> {
-  const response = await fetch(`${API_ROOT}/api/register`, {
+  const response = await fetch(`${API_BASE_URL}/register`, {
     method: "POST",
     headers: baseHeaders,
     body: JSON.stringify({
@@ -455,7 +457,7 @@ export async function registerUser(
   return data.user;
 }
 
-const API_URL = `${API_ROOT}/api`;
+const API_URL = API_BASE_URL;
 
 export interface AppUser {
   id: number;

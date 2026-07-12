@@ -16,10 +16,14 @@ interface FeedbackResponse {
   user?: FeedbackUser;
 }
 
-const API_ROOT =
-  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
-  "http://127.0.0.1:8000";
-const BASE_URL = `${API_ROOT}/api/feedback`;
+const API_BASE_URL = (
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  (import.meta.env.VITE_API_URL
+    ? `${(import.meta.env.VITE_API_URL as string).replace(/\/$/, "")}/api`
+    : undefined) ||
+  (import.meta.env.DEV ? "/api" : "https://seth-store-api.onrender.com/api")
+).replace(/\/$/, "");
+const BASE_URL = `${API_BASE_URL}/feedback`;
 const FEEDBACK_CACHE_KEY = "feedback_cache";
 
 function getHeaders() {
