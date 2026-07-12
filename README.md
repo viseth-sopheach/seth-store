@@ -52,7 +52,7 @@ For the Render deployment that serves the library and computer frontends, set:
 
 ```env
 APP_URL=https://seth-store-api.onrender.com
-FRONTEND_URL=https://seth-library.onrender.com,https://estore-nj83.onrender.com
+FRONTEND_URL=https://seth-library.onrender.com,https://estore-nj83.onrender.com,https://edrink.onrender.com
 ```
 
 Seeded accounts:
