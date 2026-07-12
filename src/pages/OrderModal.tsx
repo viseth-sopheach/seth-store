@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Order, OrderStatus } from "./dashBorad";
-import { API_URL, authHeaders, StatusBadge } from "./dashBorad";
+import { authHeaders, StatusBadge } from "./dashBorad";
+import { API_URL } from "../fetchApi/fetchApi";
 
 // ─── Modal Meta configurations ────────────────────────────────────────────────
 const STATUS_META_MODAL = {

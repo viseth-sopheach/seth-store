@@ -6,4 +6,13 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: "./", // Ensure static file hosting works everywhere
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://seth-store-api.onrender.com",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })

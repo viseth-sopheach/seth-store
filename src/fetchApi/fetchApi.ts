@@ -58,6 +58,10 @@ export function logoutUser(): void {
 }
 
 export async function fetchAuthUser(): Promise<AuthUser> {
+  if (!localStorage.getItem("seth_token")) {
+    throw new Error("No auth token");
+  }
+
   const response = await fetch(`${API_URL}/user`, {
     method: "GET",
     headers: getHeaders(false),
