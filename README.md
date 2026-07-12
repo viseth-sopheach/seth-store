@@ -42,9 +42,17 @@ cp .env.example .env
 php artisan key:generate
 
 # configure DB_* in .env (PostgrestSQL)
+# set APP_URL to the public API URL and FRONTEND_URL to every allowed frontend origin, comma-separated
 php artisan migrate --seed
 php artisan storage:link
 php artisan serve
+```
+
+For the Render deployment that serves the library and computer frontends, set:
+
+```env
+APP_URL=https://seth-store-api.onrender.com
+FRONTEND_URL=https://seth-library.onrender.com,https://estore-nj83.onrender.com
 ```
 
 Seeded accounts:
