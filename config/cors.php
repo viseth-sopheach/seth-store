@@ -1,6 +1,9 @@
 <?php
 
-$frontendUrls = array_filter(array_map('trim', explode(',', env('FRONTEND_URL', ''))));
+$frontendUrls = array_values(array_unique(array_filter(array_map(
+    fn ($url) => rtrim(trim($url), '/'),
+    explode(',', env('FRONTEND_URL', ''))
+))));
 
 return [
 
