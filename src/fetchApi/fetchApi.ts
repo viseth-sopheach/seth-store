@@ -1,4 +1,10 @@
-const API_URL = "http://127.0.0.1:8000/api";
+export const API_URL = (
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  (import.meta.env.VITE_API_URL
+    ? `${(import.meta.env.VITE_API_URL as string).replace(/\/$/, "")}/api`
+    : undefined) ||
+  (import.meta.env.DEV ? "/api" : "https://seth-store-api.onrender.com/api")
+).replace(/\/$/, "");
 const BASE_URL = `${API_URL}/drinks`;
 
 const baseHeaders = {
@@ -31,7 +37,7 @@ export async function loginUser(
   email: string,
   password: string
 ): Promise<AuthUser> {
-  const response = await fetch("http://127.0.0.1:8000/api/login", {
+  const response = await fetch(`${API_URL}/login`, {
     method: "POST",
     headers: getHeaders(false),
     body: JSON.stringify({ email, password }),
@@ -52,7 +58,7 @@ export function logoutUser(): void {
 }
 
 export async function fetchAuthUser(): Promise<AuthUser> {
-  const response = await fetch("http://127.0.0.1:8000/api/user", {
+  const response = await fetch(`${API_URL}/user`, {
     method: "GET",
     headers: getHeaders(false),
   });

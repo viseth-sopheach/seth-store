@@ -24,7 +24,7 @@ export interface Order {
   updated_at: string;
 }
 
-export const API_URL = "http://127.0.0.1:8000/api";
+import { API_URL } from "../fetchApi/fetchApi";
 
 export function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("seth_token");
