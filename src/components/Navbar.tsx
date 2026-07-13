@@ -67,8 +67,6 @@ const Navbar = ({
     onSearchChange?.(value);
   };
 
-  const [isLogin, setIsLogin] = useState(false);
-
   const handleLogin = async () => {
     if (isLoggingIn) return;
     setAuthError(null);
