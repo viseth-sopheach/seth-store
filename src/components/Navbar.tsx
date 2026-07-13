@@ -35,6 +35,7 @@ const Navbar = ({
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
   const isLoggedIn = user !== null;
@@ -66,8 +67,12 @@ const Navbar = ({
     onSearchChange?.(value);
   };
 
+  const [isLogin, setIsLogin] = useState(false);
+
   const handleLogin = async () => {
+    if (isLoggingIn) return;
     setAuthError(null);
+    setIsLoggingIn(true);
     try {
       const currentUser = await loginUser(loginEmail, loginPassword);
       setUser(currentUser);
@@ -77,6 +82,8 @@ const Navbar = ({
       setLoginPassword("");
     } catch (e) {
       setAuthError(e instanceof Error ? e.message : "Login failed.");
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -97,7 +104,9 @@ const Navbar = ({
       <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-semibold tracking-tight text-stone-900 sm:text-xl">Viseth Café</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-stone-900 sm:text-xl">
+              Viseth Café
+            </h1>
             <p className="mt-0.5 text-xs text-stone-500">
               {productsCount} item{productsCount !== 1 ? "s" : ""}
             </p>
@@ -139,12 +148,18 @@ const Navbar = ({
             </>
           )}
 
-          {!isLoggedIn && <p className="hidden text-xs italic text-stone-500 sm:block">Login to buy</p>}
+          {!isLoggedIn && (
+            <p className="hidden text-xs italic text-stone-500 sm:block">
+              Login to buy
+            </p>
+          )}
 
           {user && (
             <span
               className={`hidden items-center rounded-full px-3 py-1 text-[11px] font-semibold sm:inline-flex ${
-                isAdmin ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                isAdmin
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-amber-50 text-amber-700"
               }`}
             >
               {user.name}
@@ -153,9 +168,10 @@ const Navbar = ({
 
           <button
             onClick={user ? handleLogout : () => setLoginOpen(true)}
-            className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+            disabled={isLoggingIn}
+            className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {user ? "Logout" : "Login"}
+            {isLoggingIn ? "Logging in…" : user ? "Logout" : "Login"}
           </button>
         </div>
       </header>
@@ -163,13 +179,14 @@ const Navbar = ({
       <div className="px-4 pt-4 sm:hidden">
         <div className="relative">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400">
-            🔍
+            <FaSearch />
           </span>
+
           <input
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search drinks…"
-            className={`${inputClass} pl-9`}
+            placeholder="Search drinks..."
+            className={`${inputClass} w-full pl-10`}
           />
         </div>
       </div>
@@ -178,10 +195,13 @@ const Navbar = ({
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-stone-950/40 p-4 sm:items-center">
           <div className="w-full rounded-[1.75rem] border border-stone-200 bg-white shadow-xl sm:max-w-md">
             <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
-              <h2 className="text-base font-semibold text-stone-900">Sign in</h2>
+              <h2 className="text-base font-semibold text-stone-900">
+                Sign in
+              </h2>
               <button
                 onClick={() => setLoginOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 transition hover:bg-stone-50"
+                disabled={isLoggingIn}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 ✕
               </button>
@@ -201,7 +221,8 @@ const Navbar = ({
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  className={inputClass}
+                  disabled={isLoggingIn}
+                  className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
                   placeholder="you@example.com"
                 />
               </div>
@@ -215,7 +236,8 @@ const Navbar = ({
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                    className={`${inputClass} pr-10`}
+                    disabled={isLoggingIn}
+                    className={`${inputClass} pr-10 disabled:cursor-not-allowed disabled:opacity-60`}
                     placeholder="••••••••"
                   />
                   <button
@@ -223,19 +245,25 @@ const Navbar = ({
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 transition hover:text-stone-700"
                   >
-                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                    {showPassword ? (
+                      <FiEyeOff size={18} />
+                    ) : (
+                      <FiEye size={18} />
+                    )}
                   </button>
                 </div>
               </div>
               <button
                 onClick={handleLogin}
-                className="w-full rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                disabled={isLoggingIn}
+                className="w-full rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign in
+                {isLoggingIn ? "Signing in…" : "Sign in"}
               </button>
               <button
                 onClick={() => setLoginOpen(false)}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+                disabled={isLoggingIn}
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>

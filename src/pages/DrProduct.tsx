@@ -3,6 +3,7 @@ import BuyModal from "../components/BuyModal";
 import ProductCard from "../components/ProductCard";
 import Modal from "../components/Modal";
 import Navbar from "../components/Navbar";
+import { FaSearch } from "react-icons/fa";
 import {
   getComputerProducts,
   deleteComputerProduct,
@@ -107,7 +108,13 @@ export default function DrProduct() {
           <div className="flex flex-col items-center py-24 text-center">
             <div className="w-full max-w-sm rounded-3xl border border-stone-200 bg-white p-8 shadow-sm">
               <p className="mb-5 text-sm font-medium text-red-600">{error}</p>
-              <button onClick={() => { setLoading(true); load(); }} className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
+              <button
+                onClick={() => {
+                  setLoading(true);
+                  load();
+                }}
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+              >
                 Try again
               </button>
             </div>
@@ -117,27 +124,50 @@ export default function DrProduct() {
         {!loading && !error && filtered.length === 0 && (
           <div className="flex flex-col items-center py-24 text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-stone-200 bg-white text-3xl">
-              {search ? "🔍" : "🥤"}
+              {search ? <FaSearch /> : ""}
             </div>
-            <p className="text-base font-semibold text-stone-700">{search ? `No results for "${search}"` : "No drinks yet"}</p>
-            {!search && isAdmin && <p className="mt-1 text-sm text-stone-500">Tap + to add your first drink</p>}
+            <p className="text-base font-semibold text-stone-700">
+              {search ? `No results for "${search}"` : "No drinks yet"}
+            </p>
+            {!search && isAdmin && (
+              <p className="mt-1 text-sm text-stone-500">
+                Tap + to add your first drink
+              </p>
+            )}
           </div>
         )}
 
         {!loading && !error && filtered.length > 0 && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} isAdmin={isAdmin} isLoggedIn={isLoggedIn} onEdit={openEdit} onDelete={handleDelete} onBuy={(p) => setBuyProduct(p)} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                isAdmin={isAdmin}
+                isLoggedIn={isLoggedIn}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+                onBuy={(p) => setBuyProduct(p)}
+              />
             ))}
           </div>
         )}
       </main>
 
       {modalOpen && (
-        <Modal initial={editing} onClose={() => { setModalOpen(false); setEditing(null); }} onSave={handleSave} />
+        <Modal
+          initial={editing}
+          onClose={() => {
+            setModalOpen(false);
+            setEditing(null);
+          }}
+          onSave={handleSave}
+        />
       )}
 
-      {buyProduct && <BuyModal product={buyProduct} onClose={() => setBuyProduct(null)} />}
+      {buyProduct && (
+        <BuyModal product={buyProduct} onClose={() => setBuyProduct(null)} />
+      )}
     </div>
   );
 }

@@ -98,7 +98,7 @@ function ProductCard({
               onClick={() => setShowModal(true)}
               className="flex-1 py-3 text-sm font-medium text-stone-600 transition-colors duration-200 hover:bg-stone-50 hover:text-red-600"
             >
-              Delete
+              <p className="mx-5 bg-red-500 text-white rounded-xl p-2">Delete</p>
             </button>
           </div>
         )}
