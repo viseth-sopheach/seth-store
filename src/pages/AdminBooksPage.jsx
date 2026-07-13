@@ -162,7 +162,7 @@ export function AdminBooksPage() {
         <button
           type="button"
           onClick={fetchBooks}
-          className="text-xs font-semibold text-gray-500 underline underline-offset-4 hover:text-gray-800"
+          className="bg-blue-600 p-2 rounded-xl text-xs font-semibold text-white underline underline-offset-4 hover:text-gray-900"
         >
           Refresh
         </button>

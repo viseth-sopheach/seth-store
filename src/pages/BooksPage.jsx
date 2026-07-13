@@ -121,7 +121,7 @@ export function BooksPage() {
         <button
           type="button"
           onClick={refetch}
-          className="text-xs font-semibold text-slate-500 underline underline-offset-4 hover:text-slate-800"
+          className="bg-blue-600 p-2 rounded-xl text-xs font-semibold text-white underline underline-offset-4 hover:text-gray-900"
         >
           Refresh
         </button>
