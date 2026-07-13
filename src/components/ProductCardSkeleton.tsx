@@ -2,14 +2,16 @@
 // shown on first paint (e.g. right after Ctrl+R) before data arrives.
 
 function Pulse({ className = "" }: { className?: string }) {
-  return <div className={`bg-white/40 rounded-md animate-pulse ${className}`} />;
+  return (
+    <div className={`animate-pulse rounded-md bg-stone-200 ${className}`} />
+  );
 }
 
 export default function ProductCardSkeleton() {
   return (
-    <div className="bg-white/30 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden flex flex-col">
+    <div className="flex flex-col overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06)]">
       {/* Image */}
-      <div className="h-36 sm:h-40 bg-white/10 flex items-center justify-center overflow-hidden">
+      <div className="flex h-36 items-center justify-center overflow-hidden bg-stone-100/70 sm:h-40">
         <Pulse className="w-full h-full rounded-none" />
       </div>
 

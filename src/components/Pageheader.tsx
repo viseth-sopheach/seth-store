@@ -31,7 +31,7 @@ export default function PageHeader({
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)] px-4 sm:px-6 py-3">
+    <header className="sticky top-0 z-30 border-b border-stone-200 bg-white px-4 py-3 shadow-sm sm:px-6">
       <div className="max-w-7xl mx-auto flex items-center gap-3">
         {/* Title */}
         <div className="px-7 pt-1 flex-1 min-w-0">
@@ -63,13 +63,13 @@ export default function PageHeader({
           <>
             <button
               onClick={() => navigate("/dashboard")}
-              className="bg-cyan-200 rounded-2xl py-2 px-4 border-t-cyan-600"
+              className="rounded-2xl border border-stone-300 bg-stone-100 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-200"
             >
               Dashboard
             </button>
             <button
               onClick={onAdd}
-              className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-blue-500/75 backdrop-blur-md hover:bg-blue-500/90 active:scale-95 text-white text-sm font-semibold border border-blue-400/40 shadow-[0_4px_16px_rgba(59,130,246,0.28)] transition-all duration-200"
+              className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-stone-300 bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-700 active:scale-95"
             >
               <span className="text-lg leading-none -mt-0.5">+</span>
               <span className="hidden sm:inline">Add</span>
@@ -87,10 +87,10 @@ export default function PageHeader({
         {/* User badge */}
         {user && (
           <span
-            className={`hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border backdrop-blur-md ${
+            className={`hidden sm:inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold ${
               isAdmin
-                ? "bg-emerald-400/20 text-emerald-700 border-emerald-300/50"
-                : "bg-amber-400/20 text-amber-700 border-amber-300/50"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-amber-200 bg-amber-50 text-amber-700"
             }`}
           >
             {user.name}
@@ -100,7 +100,7 @@ export default function PageHeader({
         {/* Auth button */}
         <button
           onClick={user ? onLogout : onLogin}
-          className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-stone-900/90 backdrop-blur-md hover:bg-stone-800/90 active:scale-95 text-white text-sm font-semibold border border-stone-700/40 shadow-[0_4px_16px_rgba(15,23,42,0.28)] transition-all duration-200"
+          className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-stone-300 bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-700 active:scale-95"
         >
           {user ? "Logout" : "Login"}
         </button>

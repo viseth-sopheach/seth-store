@@ -5,7 +5,7 @@ import {
   type ProductCategory,
 } from "../api/fetchApi";
 
-// ─── Shared Payload type (mirrors fetchApi ProductPayload if you have one)
+// ─── Shared Payload type (mirrors fetchApi ProductPayload)
 export interface ComputerPayload {
   name: string;
   brand?: string;
@@ -17,12 +17,11 @@ export interface ComputerPayload {
   image?: File | null;
 }
 
-// ─── Styles (same tokens as drink Modal)
 const glassInput =
-  "w-full bg-white/20 backdrop-blur-md border border-white/50 rounded-2xl px-4 py-2.5 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:border-white/70 focus:bg-white/30 transition-all duration-200 shadow-inner";
+  "w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 transition";
 
 const glassBtn =
-  "bg-white/30 backdrop-blur-md border border-white/50 hover:bg-white/50 transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)]";
+  "rounded-xl border border-stone-300 bg-stone-100 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-200";
 
 // ─── Computer-specific constants
 const COMPUTER_TYPES = [
@@ -187,39 +186,40 @@ function Modal({
 
   // ── Render
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/40">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white/20 shadow-[0_30px_120px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/40 backdrop-blur-2xl border border-white/30 will-change-transform">
-        {/* Drag handle (mobile) */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-white/40" />
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-stone-950/45 p-3 sm:items-center sm:p-6">
+      <div className="w-full max-w-2xl overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white shadow-[0_20px_70px_rgba(15,23,42,0.16)]">
+        <div className="flex justify-center pb-1 pt-3 sm:hidden">
+          <div className="h-1.5 w-10 rounded-full bg-stone-300" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/20">
-          <h2 className="text-white/90 font-semibold text-base drop-shadow-sm">
-            {initial ? "Edit Computer Product" : "New Computer Product"}
-          </h2>
+        <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
+              Inventory
+            </p>
+            <h2 className="text-base font-semibold text-stone-900">
+              {initial ? "Edit product" : "New product"}
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className={`${glassBtn} w-8 h-8 rounded-full flex items-center justify-center text-red-700 hover:text-white/90 hover:bg-white/15 text-xs transition-all duration-300`}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-stone-50 text-sm text-stone-600 transition hover:bg-stone-100"
           >
             ✕
           </button>
         </div>
 
-        {/* Error banner */}
         {error && (
-          <div className="mx-6 mt-4 rounded-2xl bg-red-500/15 border border-red-400/30 backdrop-blur-md px-4 py-3 text-sm text-red-200 shadow-[inset_0_0_20px_rgba(239,68,68,0.05)]">
+          <div className="mx-6 mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        {/* Form body */}
-        <div className="p-6 flex flex-col gap-4 max-h-[60vh] overflow-y-auto will-change-scroll-content scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+        <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto p-6">
           {/* Name */}
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-              Name <span className="text-red-300/80">*</span>
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
+              Name <span className="text-red-500">*</span>
             </label>
             <input
               name="name"
@@ -232,7 +232,7 @@ function Modal({
 
           {/* Brand */}
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
               Brand
             </label>
             <input
@@ -246,7 +246,7 @@ function Modal({
 
           {/* Type */}
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
               Type
             </label>
             <select
@@ -262,7 +262,7 @@ function Modal({
 
           {/* Specs */}
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
               Specs
             </label>
             <input
@@ -277,8 +277,8 @@ function Modal({
           {/* Price + Stock */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-                Price <span className="text-red-300/80">*</span>
+              <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
+                Price <span className="text-red-500">*</span>
               </label>
               <input
                 name="price"
@@ -292,7 +292,7 @@ function Modal({
               />
             </div>
             <div>
-              <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+              <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
                 Stock
               </label>
               <input
@@ -309,8 +309,8 @@ function Modal({
 
           {/* Category */}
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
-              Category <span className="text-red-300/80">*</span>
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
+              Category <span className="text-red-500">*</span>
             </label>
             <select
               name="category_id"
@@ -327,9 +327,9 @@ function Modal({
               {categoryOptions}
             </select>
             {initial?.category && (
-              <p className="text-[11px] text-white/40 mt-1 drop-shadow-sm">
+              <p className="mt-1 text-[11px] text-stone-500">
                 Current:{" "}
-                <span className="text-blue-300/80">
+                <span className="font-medium text-stone-700">
                   {initial.category.name}
                 </span>{" "}
                 (ID {initial.category.id})
@@ -339,11 +339,11 @@ function Modal({
 
           {/* Image */}
           <div>
-            <label className="text-[11px] text-white/50 mb-1.5 block uppercase tracking-wider font-medium drop-shadow-sm">
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
               Image
             </label>
             <div className="grid gap-3 sm:grid-cols-[120px_1fr] sm:items-center">
-              <div className="h-28 rounded-2xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_30px_rgba(255,255,255,0.05)]">
+              <div className="flex h-28 items-center justify-center overflow-hidden rounded-2xl border border-stone-200 bg-stone-50">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
@@ -353,21 +353,19 @@ function Modal({
                     decoding="async"
                   />
                 ) : (
-                  <span className="text-[11px] text-white/30 drop-shadow-sm">
-                    No image
-                  </span>
+                  <span className="text-[11px] text-stone-400">No image</span>
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <div className="relative inline-block overflow-hidden rounded-xl">
+                <div className="relative inline-block overflow-hidden rounded-xl border border-stone-300 bg-stone-50 px-3 py-2.5">
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/jpg,image/webp"
                     onChange={handleImage}
-                    className="block text-sm text-transparent file:mr-0 file:rounded-xl file:border-0 file:bg-white/20 file:backdrop-blur-md file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white/90 file:border file:border-white/30 hover:file:bg-white/30 file:transition-all file:duration-300 file:cursor-pointer file:shadow-[0_2px_10px_rgba(255,255,255,0.1)] w-[140px]"
+                    className="block w-[140px] text-sm text-stone-600 file:mr-0 file:cursor-pointer file:rounded-full file:border-0 file:bg-stone-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-700 hover:file:bg-stone-200"
                   />
                 </div>
-                <p className="text-[11px] text-white/40 leading-relaxed drop-shadow-sm">
+                <p className="text-[11px] leading-relaxed text-stone-500">
                   {imageFile
                     ? `Selected: ${imageFile.name}`
                     : currentImage
@@ -379,24 +377,23 @@ function Modal({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-3 px-6 py-5 border-t border-white/15 bg-white/5 backdrop-blur-sm">
+        <div className="flex gap-3 border-t border-stone-200 bg-stone-50 px-6 py-5">
           <button
             onClick={onClose}
             disabled={saving}
-            className={`${glassBtn} flex-1 py-3 rounded-2xl text-red-700 text-sm font-medium disabled:opacity-50 hover:bg-white/15 hover:text-white/90 transition-all duration-300`}
+            className="flex-1 rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={submit}
             disabled={saving}
-            className="flex-1 py-3 rounded-2xl bg-white/25 backdrop-blur-md hover:bg-white/35 text-blue-500 text-sm font-semibold border border-white/40 shadow-[0_4px_30px_rgba(255,255,255,0.15)] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-[0_4px_40px_rgba(255,255,255,0.2)] hover:scale-[1.01] active:scale-[0.99]"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:bg-stone-300"
           >
             {saving && (
-              <span className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />
             )}
-            {initial ? "Save Changes" : "Add Product"}
+            {initial ? "Save changes" : "Add product"}
           </button>
         </div>
       </div>

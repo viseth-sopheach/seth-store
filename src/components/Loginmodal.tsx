@@ -52,12 +52,12 @@ export default function LoginModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-950/35 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-stone-950/50 p-4">
       <div
         className={`${glass} w-full sm:max-w-md rounded-3xl overflow-hidden`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/30">
+        <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4">
           <h2 className="text-gray-800 font-semibold text-base">
             {isLogin ? "Sign in" : "Create account"}
           </h2>
@@ -136,7 +136,7 @@ export default function LoginModal({
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full py-3 rounded-2xl bg-blue-500/90 text-white text-sm font-semibold hover:bg-blue-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
               <>
@@ -156,7 +156,7 @@ export default function LoginModal({
             <button
               type="button"
               onClick={() => switchMode(isLogin ? "register" : "login")}
-              className="text-blue-600 font-medium hover:underline"
+              className="font-medium text-stone-900 hover:underline"
             >
               {isLogin ? "Register" : "Sign in"}
             </button>

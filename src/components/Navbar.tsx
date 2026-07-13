@@ -3,9 +3,17 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { loginUser, logoutUser, registerUser } from "../api/fetchApi";
-import { glassInput } from "./glassTokens";
+import { input as inputStyle } from "./glassTokens";
 import LoginModal from "./Loginmodal";
 import { useNavbarContext } from "./Navbarcontext";
+
+function navPill(active: boolean, extra = "") {
+  return `rounded-full px-3 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 ${
+    active
+      ? "bg-stone-900 text-white"
+      : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+  } ${extra}`;
+}
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -26,17 +34,15 @@ export default function Navbar() {
   const [authError, setAuthError] = useState<string | null>(null);
 
   const isDashboard = location.pathname === "/dashboard";
+  const isStorePage = !isDashboard; // "/", "/desktop", "/accessory"
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
   const isLoggedIn = user !== null;
 
-  // Listen for "open-login-modal" dispatched by other components
   useEffect(() => {
     const handler = () => setLoginOpen(true);
     window.addEventListener("open-login-modal", handler);
     return () => window.removeEventListener("open-login-modal", handler);
   }, []);
-
-  // ── Auth handlers
 
   const handleLogin = async (email: string, password: string) => {
     setAuthError(null);
@@ -70,106 +76,110 @@ export default function Navbar() {
     window.dispatchEvent(new Event("auth-change"));
   };
 
-  // ── Avoid a flash before auth resolves
   if (authLoading) {
-    return null;
+    return (
+      <div className="bg-white">
+        <div className="mx-auto flex h-[60px] max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+          <div className="h-4 w-32 animate-pulse rounded bg-stone-200" />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)]">
-      <header className="sticky top-0 z-30 bg-white/25 backdrop-blur-2xl border-b border-white/40 shadow-[0_2px_20px_rgba(0,0,0,0.06)] px-4 sm:px-6 py-3">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          {/* LEFT — Title + item count */}
-          <div className="flex-1 min-w-0 pl-2 order-1">
-            <h1 className="text-gray-800 font-bold text-lg sm:text-xl tracking-tight leading-tight truncate">
-              {isDashboard ? "Viseth Manager" : "Viseth's Tech"}
-            </h1>
-            {!isDashboard && (
-              <p className="text-[12px] text-gray-400 mt-0.5 leading-none truncate">
-                {loadingProducts
-                  ? "Loading…"
-                  : `${productCount ?? 0} item${productCount !== 1 ? "s" : ""}`}
-              </p>
-            )}
-          </div>
-
-          {/* CENTER — Search bar (only relevant on the products page) */}
+    <div className="bg-white">
+      <header className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-lg font-semibold tracking-tight text-stone-900 sm:text-xl">
+            {isDashboard ? "Viseth Manager" : "Viseth's Tech"}
+          </h1>
           {!isDashboard && (
-            <div className="relative hidden md:block w-56 lg:w-72 order-3 md:order-2">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">
-                <FaSearch />
-              </span>
-              <input
-                value={search ?? ""}
-                onChange={(e) => onSearchChange?.(e.target.value)}
-                placeholder="Search…"
-                className={`${glassInput} pl-9 w-full`}
-              />
-            </div>
+            <p className="mt-0.5 text-xs text-stone-500 sm:text-sm">
+              {loadingProducts
+                ? "Loading…"
+                : `${productCount ?? 0} item${productCount !== 1 ? "s" : ""} available`}
+            </p>
+          )}
+        </div>
+
+        {!isDashboard && (
+          <div className="relative hidden w-56 md:block lg:w-72">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400">
+              <FaSearch aria-hidden="true" />
+            </span>
+            <input
+              value={search ?? ""}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder="Search products"
+              aria-label="Search products"
+              className={`${inputStyle} pl-9`}
+            />
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {isAdmin && (
+            <>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className={navPill(isDashboard)}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className={navPill(isStorePage)}
+              >
+                Store
+              </button>
+              {!isDashboard && onAdd && (
+                <button
+                  onClick={onAdd}
+                  className="rounded-full bg-stone-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                >
+                  + Add
+                </button>
+              )}
+            </>
           )}
 
-          {/* RIGHT — Admin buttons + user badge + auth */}
-          <div className="flex items-center gap-2 flex-wrap justify-end order-2 md:order-3">
-            {isAdmin && (
-              <>
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className={`rounded-2xl py-2 px-3 sm:px-4 text-sm font-medium cursor-pointer transition-colors whitespace-nowrap backdrop-blur-sm ${
-                    location.pathname === "/dashboard"
-                      ? "bg-blue-400 text-white"
-                      : "bg-green-200 text-gray-700 hover:bg-green-300"
-                  }`}
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={() => navigate("/")}
-                  className={`w-fit rounded-2xl py-2 px-3 sm:px-4 text-sm font-medium cursor-pointer transition-colors whitespace-nowrap backdrop-blur-sm ${
-                    location.pathname === "/"
-                      ? "bg-blue-400 text-white"
-                      : "bg-green-200 text-gray-700 hover:bg-green-300"
-                  }`}
-                >
-                  Computer Products
-                </button>
-                {!isDashboard && onAdd && (
-                  <button
-    onClick={onAdd}
-    className="bg-green-300 w-fit rounded-2xl py-2 px-3 sm:px-4 text-sm font-medium cursor-pointer transition-colors whitespace-nowrap backdrop-blur-sm flex items-center gap-1"
-  >
-    <span>+Add</span>
-  </button>
-                )}
-              </>
-            )}
+          {!isLoggedIn && (
+            <p className="hidden text-xs text-stone-500 lg:block">
+              Login to buy
+            </p>
+          )}
 
-            {!isLoggedIn && (
-              <p className="hidden lg:block text-[11px] text-gray-400 italic whitespace-nowrap">
-                Login to buy
-              </p>
-            )}
+          {user && (
+            <span className="hidden rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-700 sm:inline-flex">
+              {user.name}
+            </span>
+          )}
 
-            {user && (
-              <button
-                className={`hidden sm:inline-flex items-center px-2.5 py-1 rounded-2xl text-[11px] font-bold border backdrop-blur-md whitespace-nowrap ${
-                  isAdmin
-                    ? "py-2.5 bg-emerald-400/20 text-emerald-700 border-emerald-300/50"
-                    : "bg-amber-400/20 text-amber-700 border-amber-300/50"
-                }`}
-              >
-                {user.name}
-              </button>
-            )}
-
-            <button
-              onClick={user ? handleLogout : () => setLoginOpen(true)}
-              className="shrink-0 flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-2xl bg-red-500 backdrop-blur-md hover:bg-red-600/90 active:scale-95 text-white text-sm font-semibold border border-stone-700/40 shadow-[0_4px_16px_rgba(15,23,42,0.28)] transition-all duration-200 cursor-pointer"
-            >
-              {user ? "Logout" : "Login"}
-            </button>
-          </div>
+          <button
+            onClick={user ? handleLogout : () => setLoginOpen(true)}
+            className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+          >
+            {user ? "Logout" : "Login"}
+          </button>
         </div>
       </header>
+
+      {!isDashboard && (
+        <div className="px-4 pb-3 md:hidden">
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400">
+              <FaSearch aria-hidden="true" />
+            </span>
+            <input
+              value={search ?? ""}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder="Search products"
+              aria-label="Search products"
+              className={`${inputStyle} pl-9`}
+            />
+          </div>
+        </div>
+      )}
 
       {loginOpen &&
         createPortal(
@@ -181,23 +191,6 @@ export default function Navbar() {
           />,
           document.body,
         )}
-
-      {/* Mobile search — only on the products page */}
-      {!isDashboard && (
-        <div className="md:hidden px-4 pt-3 pb-1">
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">
-              <FaSearch />
-            </span>
-            <input
-              value={search ?? ""}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder="Search products…"
-              className={`${glassInput} pl-9 w-full`}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

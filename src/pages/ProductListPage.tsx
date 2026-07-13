@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import BuyModal from "../components/BuyModal";
 import Modal, { type ComputerPayload } from "../components/Modal";
-import BackgroundBlobs from "../components/Backgroundblobs";
 import ProductGrid from "../components/Productgrid";
 import {
   usePublishNavbarData,
@@ -36,7 +35,7 @@ function readProductsCache(): Product[] {
       image_url: normalizeApiAssetUrl(product.image_url),
       image:
         typeof product.image === "string"
-          ? normalizeApiAssetUrl(product.image) ?? product.image
+          ? (normalizeApiAssetUrl(product.image) ?? product.image)
           : product.image,
     }));
   } catch {
@@ -52,8 +51,7 @@ function writeProductsCache(products: Product[]) {
 
 // ─── PcProduct
 
-export default function PcProduct({pageType}: ProductListPageProps) {
-  
+export default function PcProduct({ pageType }: ProductListPageProps) {
   const { user, products, setProducts, productsLoaded, setProductsLoaded } =
     useNavbarContext();
 
@@ -129,17 +127,17 @@ export default function PcProduct({pageType}: ProductListPageProps) {
   // ── CRUD
 
   const handleDelete = async (id: number) => {
-  try {
-    await deleteComputerProduct(id);
-    setProducts((prev) => {
-      const next = prev.filter((p) => p.id !== id);
-      writeProductsCache(next);
-      return next;
-    });
-  } catch (e) {
-    alert(e instanceof Error ? e.message : "Delete failed.");
-  }
-};
+    try {
+      await deleteComputerProduct(id);
+      setProducts((prev) => {
+        const next = prev.filter((p) => p.id !== id);
+        writeProductsCache(next);
+        return next;
+      });
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Delete failed.");
+    }
+  };
 
   const handleSave = async (data: ComputerPayload) => {
     if (editing) {
@@ -187,32 +185,22 @@ export default function PcProduct({pageType}: ProductListPageProps) {
   // ── Render
 
   return (
-    <div
-      className="min-h-screen font-sans relative overflow-x-hidden"
-      style={{
-        boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
-      }}
-    >
-      <BackgroundBlobs />
-
-      {/* Main content */}
-      <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
-        <ProductGrid
-          // Only true when there's no live data AND no cache hit — should be
-          // rare after the first-ever visit on a given browser.
-          loading={loading && products.length === 0}
-          refreshing={refreshing}
-          error={error}
-          products={filtered}
-          search={search}
-          isAdmin={isAdmin}
-          isLoggedIn={isLoggedIn}
-          onRetry={() => load({ silent: products.length > 0 })}
-          onEdit={openEdit}
-          onDelete={handleDelete}
-          onBuy={setBuyProduct}
-        />
-      </main>
+    <>
+      <ProductGrid
+        // Only true when there's no live data AND no cache hit — should be
+        // rare after the first-ever visit on a given browser.
+        loading={loading && products.length === 0}
+        refreshing={refreshing}
+        error={error}
+        products={filtered}
+        search={search}
+        isAdmin={isAdmin}
+        isLoggedIn={isLoggedIn}
+        onRetry={() => load({ silent: products.length > 0 })}
+        onEdit={openEdit}
+        onDelete={handleDelete}
+        onBuy={setBuyProduct}
+      />
 
       {/* Add / Edit modal */}
       {modalOpen && (
@@ -230,6 +218,6 @@ export default function PcProduct({pageType}: ProductListPageProps) {
       {buyProduct && (
         <BuyModal product={buyProduct} onClose={() => setBuyProduct(null)} />
       )}
-    </div>
+    </>
   );
 }

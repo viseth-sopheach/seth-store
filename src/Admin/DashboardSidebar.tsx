@@ -34,7 +34,7 @@ export default function DashboardSidebar({
   onTabChange,
 }: DashboardSidebarProps) {
   return (
-    <aside className="w-64 shrink-0 h-screen sticky top-0 bg-white border-r border-gray-200 flex flex-col">
+    <aside className="w-64 shrink-0 h-screen sticky top-0 z-30 bg-white border-r border-gray-200 flex flex-col">
       <div className="px-6 py-5 border-b border-gray-100">
         <h1 className="text-lg font-bold text-gray-900">Admin Panel</h1>
         <p className="text-xs text-gray-400 mt-0.5">Manage Seth store</p>

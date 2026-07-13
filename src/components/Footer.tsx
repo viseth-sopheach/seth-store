@@ -29,25 +29,30 @@ export default function Footer() {
   };
 
   return (
-    <footer className={`${glass} rounded-3xl w-full mt-12 px-6 py-8`}>
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-        <div>
-          <h3 className="text-gray-800 text-lg font-semibold">
+    <footer
+      className={`${glass} mt-6 w-full rounded-[1.5rem] px-4 py-6 sm:px-6 sm:py-8 lg:px-8`}
+    >
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div className="max-w-md">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
+            Contact
+          </p>
+          <h3 className="mt-2 text-lg font-semibold text-stone-900">
             Send us feedback
           </h3>
-          <p className="text-gray-500 text-sm mt-1">
-            Found a bug, have a suggestion, or just something else?
+          <p className="mt-1 text-sm text-stone-600">
+            Share a suggestion, report a problem, or ask about a product.
           </p>
         </div>
 
         {status === "success" ? (
-          <p className="text-sm text-emerald-600 font-medium">
-            Thanks — your feedback was sent!
+          <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            Thanks — your feedback was sent successfully.
           </p>
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col gap-3 w-full md:max-w-md"
+            className="flex w-full flex-col gap-3 md:max-w-md"
           >
             <input
               type="text"
@@ -62,37 +67,29 @@ export default function Footer() {
               placeholder="Your message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className={`${glassInput} min-h-[100px] resize-none`}
+              className={`${glassInput} min-h-[104px] resize-none`}
               required
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className={`${glassBtn} rounded-2xl px-5 py-2.5 text-sm font-medium text-gray-800 self-start disabled:opacity-60`}
+              className={`${glassBtn} self-start px-5 py-2.5 font-medium text-stone-800 disabled:cursor-not-allowed disabled:opacity-60`}
             >
               {status === "loading" ? "Sending…" : "Send feedback"}
             </button>
             {status === "error" && errorMsg && (
-              <p className="text-sm text-red-500">{errorMsg}</p>
+              <p className="text-sm text-red-600">{errorMsg}</p>
             )}
           </form>
         )}
       </div>
 
-      <div className="max-w-5xl mx-auto mt-6 pt-6 border-t border-white/40 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <p className="text-gray-400 text-xs">
-          © {new Date().getFullYear()} SOPHAECH VISETH
-        </p>
-        <div className="flex gap-4 text-gray-400 text-xs">
-          <p className="hover:text-gray-600">
-            Privacy
-          </p>
-          <p className="hover:text-gray-600">
-            Terms
-          </p>
-          <p className="hover:text-gray-600">
-            Contact
-          </p>
+      <div className="mx-auto mt-6 flex flex-col items-center justify-between gap-2 border-t border-stone-200 pt-6 text-sm text-stone-500 sm:flex-row">
+        <p>© {new Date().getFullYear()} SOPHAECH VISETH</p>
+        <div className="flex gap-4">
+          <span>Privacy</span>
+          <span>Terms</span>
+          <span>Contact</span>
         </div>
       </div>
     </footer>

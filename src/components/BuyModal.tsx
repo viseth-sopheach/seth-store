@@ -1,3 +1,4 @@
+import { FaLaptopCode } from "react-icons/fa";
 import { MdDone } from "react-icons/md";
 import { useState } from "react";
 import { placeComputerShopOrder, type Product } from "../api/fetchApi";
@@ -52,10 +53,7 @@ function BuyModal({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-black/40"
-          onClick={onClose}
-        />
+        <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
         <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-xl border border-gray-100">
           <div className="flex flex-col items-center gap-4 px-6 py-10 text-center">
@@ -69,7 +67,9 @@ function BuyModal({
                 Order placed
               </h3>
               <p className="text-gray-500 text-sm leading-relaxed">
-                <span className="font-medium text-gray-700">{product.name}</span>{" "}
+                <span className="font-medium text-gray-700">
+                  {product.name}
+                </span>{" "}
                 × {qty} will be shipped to{" "}
                 <span className="text-gray-700 font-medium">{address}</span>.
               </p>
@@ -99,15 +99,15 @@ function BuyModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Sheet on mobile, centered modal on sm+ */}
       <div className="relative z-10 w-full sm:max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-xl border border-gray-100">
         {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden" aria-hidden="true">
+        <div
+          className="flex justify-center pt-3 pb-1 sm:hidden"
+          aria-hidden="true"
+        >
           <div className="w-10 h-1 rounded-full bg-gray-300" />
         </div>
 
@@ -147,7 +147,7 @@ function BuyModal({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-2xl sm:text-3xl">💻</span>
+                <FaLaptopCode className="text-5xl" />
               )}
             </div>
 

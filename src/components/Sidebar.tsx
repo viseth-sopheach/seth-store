@@ -13,7 +13,6 @@ const CATEGORIES: { label: ProductCategory; icon: LucideIcon; path: string }[] =
 
 interface SidebarProps {
   onSelectCategory?: (category: ProductCategory) => void;
-  /** Controls the mobile drawer. Ignored at md and above, where the sidebar is always visible. */
   isOpen?: boolean;
   onClose?: () => void;
 }
@@ -29,41 +28,45 @@ export default function Sidebar({
   };
 
   return (
-    <div className="md:block md:shrink-0">
-      {/* Mobile backdrop */}
+    <div className="lg:w-56 lg:shrink-0">
       {isOpen && (
         <div
           onClick={onClose}
           aria-hidden="true"
-          className="fixed inset-0 bg-black/30 z-40 md:hidden"
+          className="fixed inset-0 z-40 bg-stone-950/25 lg:hidden"
+          style={{ top: "var(--navbar-height, 0px)" }}
         />
       )}
 
       <aside
-        className={`${glass} rounded-none md:rounded-3xl fixed md:sticky top-0 md:top-4 left-0 z-50 md:z-30
-          h-screen md:h-[80vh] w-64 md:w-56 shrink-0 p-4 flex flex-col justify-center items-center gap-4
-          transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        role="dialog"
+        aria-modal={isOpen}
+        className={`${glass} fixed z-40 flex w-64 flex-col overflow-hidden p-4 transition-transform duration-300 ease-out
+          top-[var(--navbar-height,0px)] h-[calc(100vh-var(--navbar-height,0px))]
+          left-0
+          lg:left-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] lg:w-56 lg:translate-x-0 lg:rounded-[1.5rem]
+          lg:h-[calc(100vh-var(--navbar-height,0px)-1.5rem)]
+          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
-        {/* Close Button Container - Positioned absolutely at the top so it doesn't break the central alignment */}
-        <div className="absolute top-4 right-4 md:hidden">
+        <div className="flex shrink-0 items-center justify-between lg:justify-center">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
+              Browse
+            </p>
+            <h2 className="mt-1 text-sm font-semibold text-stone-900">
+              Categories
+            </h2>
+          </div>
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="p-1 rounded-lg text-neutral-950 hover:bg-white/40"
+            className="rounded-full p-2 text-stone-600 hover:bg-stone-100 lg:hidden"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="text-center">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-black mb-3">
-            Categories
-          </h2>
-        </div>
-
-        {/* Centered Navigation Items */}
-        <nav className="flex flex-col gap-2 w-full max-w-[180px]">
+        <nav className="mt-5 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
           {CATEGORIES.map(({ label, icon: Icon, path }) => (
             <NavLink
               key={label}
@@ -71,10 +74,10 @@ export default function Sidebar({
               end={path === "/"}
               onClick={() => handleSelect(label)}
               className={({ isActive }) =>
-                `flex items-center justify-center gap-3 px-4 py-2 rounded-2xl text-center text-sm font-medium transition-all duration-200 ${
+                `flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 ${
                   isActive
-                    ? "bg-white/50 !text-neutral-950 border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-                    : "!text-neutral-950 hover:bg-white/30 border border-transparent"
+                    ? "bg-stone-900 text-white shadow-sm"
+                    : "text-stone-700 hover:bg-stone-100"
                 }`
               }
             >
@@ -82,10 +85,10 @@ export default function Sidebar({
                 <>
                   <Icon
                     size={18}
-                    strokeWidth={isActive ? 2.25 : 1.75}
+                    strokeWidth={isActive ? 2.2 : 1.7}
                     aria-hidden="true"
                   />
-                  <span style={{ color: "#020617" }}>{label}</span>
+                  <span>{label}</span>
                 </>
               )}
             </NavLink>
